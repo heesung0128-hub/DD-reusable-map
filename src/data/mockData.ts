@@ -12,17 +12,15 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     id: 'rest-1',
     name: '방배 그린마라탕 & 꿔바로우',
     category: '마라탕/중식',
-    distanceFromSchool: '동덕여고 정문 도보 4분 (280m)',
-    walkMinutes: 4,
+    distanceMeters: 280,
+    deliveryMinutes: 15,
     lat: 37.4812,
     lng: 126.9915,
     address: '서울 서초구 방배로 38 2층',
     phone: '02-588-7721',
     containerSupport: {
-      type: '안심 살균 스테인리스 보온용기 (SUS304)',
       system: '주문 시 [다회용기] 무료 선택',
       returnSpot: '동덕여고 본관 1층 / 급식실 앞 수거함 / 매장 반납',
-      benefit: '다회용기 주문 시 분모자 무료 추가 + 수거비 무료',
     },
     menus: [
       {
@@ -54,17 +52,15 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     id: 'rest-2',
     name: '동덕 낭만즉석떡볶이',
     category: '분식/떡볶이',
-    distanceFromSchool: '동덕여고 정문 도보 2분 (150m)',
-    walkMinutes: 2,
+    distanceMeters: 150,
+    deliveryMinutes: 12,
     lat: 37.4789,
     lng: 126.9882,
     address: '서울 서초구 방배로3길 18 1층',
     phone: '02-521-3389',
     containerSupport: {
-      type: 'BPA-Free 밀폐 다회용기 + 보온백',
       system: '배달/포장 주문 시 [다회용기] 체크',
       returnSpot: '동덕여고 급식실 앞 반납함 / 매장 카운터',
-      benefit: '다회용기 선택 시 김말이 2개 서비스 증정',
     },
     menus: [
       {
@@ -96,17 +92,15 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     id: 'rest-3',
     name: '보울앤그린 에코 포케 방배본점',
     category: '포케/샐러드',
-    distanceFromSchool: '동덕여고 정문 도보 5분 (340m)',
-    walkMinutes: 5,
+    distanceMeters: 340,
+    deliveryMinutes: 18,
     lat: 37.4825,
     lng: 126.9878,
     address: '서울 서초구 효령로31길 12 1층',
     phone: '02-582-9904',
     containerSupport: {
-      type: '친환경 에코 다회용 샐러드 보울',
       system: '주문 시 [에코 다회용기] 기본 제공',
       returnSpot: '동덕여고 본관 1층 / 매장 전용 수거함',
-      benefit: '다회용 보울 선택 시 아보카도 하프 무료 토핑',
     },
     menus: [
       {
@@ -138,17 +132,15 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     id: 'rest-4',
     name: '방배골 짚불 제육 & 된장한상',
     category: '한식/도시락',
-    distanceFromSchool: '동덕여고 도보 6분 (410m)',
-    walkMinutes: 6,
+    distanceMeters: 410,
+    deliveryMinutes: 20,
     lat: 37.4772,
     lng: 126.9928,
     address: '서울 서초구 남부순환로 212길 14',
     phone: '02-587-1190',
     containerSupport: {
-      type: '전문 살균 3단 다회용 찬합 & 국보온통',
       system: '주문 시 [다회용기 찬합] 선택',
       returnSpot: '동덕여고 급식실 입구 수거함 / 매장 반납',
-      benefit: '다회용기 주문 시 계란후라이 + 요구르트 서비스',
     },
     menus: [
       {
@@ -180,17 +172,15 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     id: 'rest-5',
     name: '파스타 & 리조또 스튜디오 방배',
     category: '양식/버거',
-    distanceFromSchool: '동덕여고 도보 7분 (480m)',
-    walkMinutes: 7,
+    distanceMeters: 480,
+    deliveryMinutes: 25,
     lat: 37.4831,
     lng: 126.9935,
     address: '서울 서초구 방배로 52 1층',
     phone: '02-581-2299',
     containerSupport: {
-      type: '오븐형 내열유리 다회용기 + 전용 백',
       system: '배달/포장 시 [다회용기] 체크',
       returnSpot: '동덕여고 본관 1층 / 매장 전용 반납함',
-      benefit: '다회용기 주문 시 수제 마늘빵 3조각 증정',
     },
     menus: [
       {
@@ -222,17 +212,15 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     id: 'rest-6',
     name: '초록달콤 베이커리 & 에코 카페',
     category: '카페/디저트',
-    distanceFromSchool: '동덕여고 후문 도보 3분 (190m)',
-    walkMinutes: 3,
+    distanceMeters: 190,
+    deliveryMinutes: 10,
     lat: 37.4781,
     lng: 126.9869,
     address: '서울 서초구 방배천로 16 1층',
     phone: '02-583-0091',
     containerSupport: {
-      type: '안심 다회용 컵 & 친환경 디저트 용기',
       system: '음료 주문 시 [다회용 컵] 선택 (보증금 0원)',
       returnSpot: '동덕여고 후문 경비실 옆 수거함 / 매장 반납기',
-      benefit: '다회용 컵 선택 시 300원 할인 & 스콘 쿠폰',
     },
     menus: [
       {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, MapPin, Sparkles, Utensils, 
-  Phone, Clock, Award, CheckCircle, Info, ChevronRight, X, Heart, Shield, RefreshCw, Key, ArrowRight, CornerDownRight
+  Phone, CheckCircle, Info, ChevronRight, X, Heart, RefreshCw, Key, ArrowRight, CornerDownRight, Truck
 } from 'lucide-react';
 import { Restaurant, FoodCategory } from '../types';
 import { RESTAURANTS_DATA, DONGDEOK_SCHOOL_COORDS } from '../data/mockData';
@@ -334,7 +334,7 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                         >
                           <span>{pinEmoji}</span>
                           <span>{rest.name.split(' ')[0]}</span>
-                          <span className="text-[9px] opacity-80 font-normal">({rest.walkMinutes}분)</span>
+                          <span className="text-[9px] opacity-80 font-normal">(배달 {rest.deliveryMinutes}분)</span>
                         </div>
                         <div
                           className={`w-2 h-2 rotate-45 -mt-0.8 mx-auto ${
@@ -370,8 +370,8 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                           {selectedRestaurant.category}
                         </span>
                         <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-emerald-600" />
-                          {selectedRestaurant.distanceFromSchool}
+                          <Truck className="w-3 h-3 text-emerald-600" />
+                          학교에서 {selectedRestaurant.distanceMeters}m · 배달 약 {selectedRestaurant.deliveryMinutes}분
                         </span>
                       </div>
                       <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
@@ -408,23 +408,9 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                       </div>
 
                       <div className="flex items-start gap-1.5 text-emerald-900">
-                        <Shield className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong>제공 용기:</strong> {selectedRestaurant.containerSupport.type}
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-1.5 text-emerald-900">
                         <CornerDownRight className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
                         <div>
                           <strong>반납 장소:</strong> {selectedRestaurant.containerSupport.returnSpot}
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-1.5 text-emerald-900">
-                        <Award className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong>혜택:</strong> <span className="text-emerald-800 font-bold">{selectedRestaurant.containerSupport.benefit}</span>
                         </div>
                       </div>
                     </div>
@@ -522,7 +508,7 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                   </div>
                   <div>
                     <div className="font-extrabold text-xs text-slate-900">{rest.name}</div>
-                    <div className="text-[10px] text-slate-500">{rest.distanceFromSchool} · {rest.containerSupport.benefit}</div>
+                    <div className="text-[10px] text-slate-500">학교에서 {rest.distanceMeters}m · 배달 약 {rest.deliveryMinutes}분</div>
                   </div>
                 </div>
 

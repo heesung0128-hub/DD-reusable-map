@@ -15,17 +15,15 @@ export interface Restaurant {
   id: string;
   name: string;
   category: FoodCategory;
-  distanceFromSchool: string;
-  walkMinutes: number;
+  distanceMeters: number;
+  deliveryMinutes: number;
   lat: number;
   lng: number;
   address: string;
   phone: string;
   containerSupport: {
-    type: string;
     system: string;
     returnSpot: string;
-    benefit: string;
   };
   menus: MenuItem[];
   openHours: string;
