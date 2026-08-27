@@ -2,11 +2,15 @@ export type FoodCategory = '전체' | '분식/떡볶이' | '마라탕/중식' | 
 
 export type ActivePage = 'map' | 'guide' | 'gallery';
 
+export type MenuRecommendationTag = '대표메뉴' | '저탄소';
+
 export interface MenuItem {
   id: string;
   name: string;
   price: number;
   isVegetarian?: boolean;
+  carbonKg?: number;
+  recommendationTag?: MenuRecommendationTag;
   description: string;
   image: string;
 }
