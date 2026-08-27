@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search, MapPin, Sparkles, Utensils,
-  Phone, CheckCircle, Info, ChevronRight, X, Heart, RefreshCw, Key, ArrowRight, CornerDownRight, Truck, Leaf, Star
+  CheckCircle, Info, ChevronRight, X, Heart, RefreshCw, Key, ArrowRight, CornerDownRight, Truck, Leaf, Star, ExternalLink
 } from 'lucide-react';
 import { Restaurant, FoodCategory } from '../types';
 import { RESTAURANTS_DATA, DONGDEOK_SCHOOL_COORDS } from '../data/mockData';
@@ -416,15 +416,17 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                     </div>
                   </div>
 
-                  {/* Store Address & Phone Button */}
+                  {/* Store Address & Baemin Order Button */}
                   <div className="flex items-center justify-between gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200 text-[11px] mb-3">
-                    <span className="text-slate-600 truncate">{selectedRestaurant.address}</span>
+                    <span className="text-slate-600 truncate">{selectedRestaurant.address} · {selectedRestaurant.phone}</span>
                     <a
-                      href={`tel:${selectedRestaurant.phone}`}
+                      href={selectedRestaurant.baeminUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold shrink-0 hover:bg-emerald-700 flex items-center gap-1 active:scale-95 transition-all text-[11px]"
                     >
-                      <Phone className="w-3 h-3" />
-                      <span>전화 주문</span>
+                      <ExternalLink className="w-3 h-3" />
+                      <span>배민 주문</span>
                     </a>
                   </div>
 

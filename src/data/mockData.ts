@@ -18,6 +18,7 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     lng: 126.9915,
     address: '서울 서초구 방배로 38 2층',
     phone: '02-588-7721',
+    baeminUrl: 'https://www.baemin.com/',
     containerSupport: {
       system: '주문 시 [다회용기] 무료 선택',
       returnSpot: '동덕여고 본관 1층 / 급식실 앞 수거함 / 매장 반납',
@@ -58,6 +59,7 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     lng: 126.9882,
     address: '서울 서초구 방배로3길 18 1층',
     phone: '02-521-3389',
+    baeminUrl: 'https://www.baemin.com/',
     containerSupport: {
       system: '배달/포장 주문 시 [다회용기] 체크',
       returnSpot: '동덕여고 급식실 앞 반납함 / 매장 카운터',
@@ -94,6 +96,7 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     lng: 126.9878,
     address: '서울 서초구 효령로31길 12 1층',
     phone: '02-582-9904',
+    baeminUrl: 'https://www.baemin.com/',
     containerSupport: {
       system: '주문 시 [에코 다회용기] 기본 제공',
       returnSpot: '동덕여고 본관 1층 / 매장 전용 수거함',
@@ -130,6 +133,7 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     lng: 126.9928,
     address: '서울 서초구 남부순환로 212길 14',
     phone: '02-587-1190',
+    baeminUrl: 'https://www.baemin.com/',
     containerSupport: {
       system: '주문 시 [다회용기 찬합] 선택',
       returnSpot: '동덕여고 급식실 입구 수거함 / 매장 반납',
@@ -166,6 +170,7 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     lng: 126.9935,
     address: '서울 서초구 방배로 52 1층',
     phone: '02-581-2299',
+    baeminUrl: 'https://www.baemin.com/',
     containerSupport: {
       system: '배달/포장 시 [다회용기] 체크',
       returnSpot: '동덕여고 본관 1층 / 매장 전용 반납함',
@@ -202,6 +207,7 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     lng: 126.9869,
     address: '서울 서초구 방배천로 16 1층',
     phone: '02-583-0091',
+    baeminUrl: 'https://www.baemin.com/',
     containerSupport: {
       system: '음료 주문 시 [다회용 컵] 선택 (보증금 0원)',
       returnSpot: '동덕여고 후문 경비실 옆 수거함 / 매장 반납기',

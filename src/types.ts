@@ -23,6 +23,7 @@ export interface Restaurant {
   lng: number;
   address: string;
   phone: string;
+  baeminUrl: string;
   containerSupport: {
     system: string;
     returnSpot: string;
