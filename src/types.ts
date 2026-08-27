@@ -8,10 +8,8 @@ export interface MenuItem {
   id: string;
   name: string;
   price: number;
-  isVegetarian?: boolean;
   carbonKg?: number;
   recommendationTag?: MenuRecommendationTag;
-  description: string;
   image: string;
 }
 
