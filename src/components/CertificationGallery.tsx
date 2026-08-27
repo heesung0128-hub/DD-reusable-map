@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
   Camera, Heart, Sparkles, CheckCircle,
-  X, Send, Trash2, Filter
+  X, Send, Trash2, Filter, AlertCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import {
+  collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc,
+  increment, serverTimestamp, orderBy, query,
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { CertificationPost } from '../types';
-import { INITIAL_CERTIFICATION_POSTS, RESTAURANTS_DATA } from '../data/mockData';
+import { RESTAURANTS_DATA } from '../data/mockData';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 // Phone camera photos are often several MB; downscale + re-encode before
@@ -59,18 +64,10 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
   onCloseModal,
   onOpenModal,
 }) => {
-  // Load posts from localStorage or fallback to default mock data
-  const [posts, setPosts] = useState<CertificationPost[]>(() => {
-    const saved = localStorage.getItem('dongdeok_eco_cert_posts');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return INITIAL_CERTIFICATION_POSTS;
-      }
-    }
-    return INITIAL_CERTIFICATION_POSTS;
-  });
+  // Posts are shared across every visitor via Firestore (real-time synced)
+  const [posts, setPosts] = useState<CertificationPost[]>([]);
+  const [postsLoading, setPostsLoading] = useState(true);
+  const [postsError, setPostsError] = useState(false);
 
   const [likedPostIds, setLikedPostIds] = useState<string[]>(() => {
     const saved = localStorage.getItem('dongdeok_eco_liked_ids');
@@ -96,15 +93,38 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
   const [comment, setComment] = useState('');
   const [photoUrl, setPhotoUrl] = useState('https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80');
 
-  // Sync state changes with localStorage
+  // Subscribe to the shared certification board in Firestore
   useEffect(() => {
-    try {
-      localStorage.setItem('dongdeok_eco_cert_posts', JSON.stringify(posts));
-    } catch (e) {
-      console.error(e);
-      alert('저장 공간이 부족해 최근 인증글이 이 기기에 저장되지 못했습니다. 사진 용량이 큰 게시물을 삭제한 뒤 다시 시도해주세요.');
-    }
-  }, [posts]);
+    const q = query(collection(db, 'certifications'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        setPosts(snapshot.docs.map((d) => {
+          const data = d.data();
+          return {
+            id: d.id,
+            studentName: data.studentName,
+            gradeClass: data.gradeClass,
+            restaurantName: data.restaurantName,
+            menuName: data.menuName,
+            photoUrl: data.photoUrl,
+            comment: data.comment,
+            likes: data.likes,
+            date: data.date,
+            verified: data.verified,
+          } as CertificationPost;
+        }));
+        setPostsLoading(false);
+        setPostsError(false);
+      },
+      (err) => {
+        console.error(err);
+        setPostsLoading(false);
+        setPostsError(true);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     try {
@@ -132,13 +152,22 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
       });
   };
 
-  const handleToggleLike = (postId: string) => {
+  const handleToggleLike = async (postId: string) => {
+    const postRef = doc(db, 'certifications', postId);
     if (likedPostIds.includes(postId)) {
       setLikedPostIds(prev => prev.filter(id => id !== postId));
-      setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: Math.max(0, p.likes - 1) } : p));
+      try {
+        await updateDoc(postRef, { likes: increment(-1) });
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setLikedPostIds(prev => [...prev, postId]);
-      setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: p.likes + 1 } : p));
+      try {
+        await updateDoc(postRef, { likes: increment(1) });
+      } catch (err) {
+        console.error(err);
+      }
       confetti({
         particleCount: 30,
         spread: 45,
@@ -148,22 +177,26 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
     }
   };
 
-  const handleDeletePost = (postId: string, e: React.MouseEvent) => {
+  const handleDeletePost = async (postId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (window.confirm('이 인증 게시글을 삭제하시겠습니까?')) {
-      setPosts(prev => prev.filter(p => p.id !== postId));
+      try {
+        await deleteDoc(doc(db, 'certifications', postId));
+      } catch (err) {
+        console.error(err);
+        alert('삭제 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
     }
   };
 
-  const handleSubmitNewPost = (e: React.FormEvent) => {
+  const handleSubmitNewPost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!authorName.trim() || !comment.trim()) {
       alert('이름과 실천 소감을 입력해주세요!');
       return;
     }
 
-    const newPost: CertificationPost = {
-      id: `post-${Date.now()}`,
+    const newPostData = {
       studentName: authorName.trim(),
       gradeClass: gradeClass.trim() || '동덕여자고등학교',
       restaurantName: selectedRest,
@@ -173,21 +206,27 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
       likes: 1,
       date: new Date().toISOString().split('T')[0],
       verified: true,
+      createdAt: serverTimestamp(),
     };
 
-    setPosts([newPost, ...posts]);
-    setLikedPostIds(prev => [...prev, newPost.id]);
-    onCloseModal();
+    try {
+      const docRef = await addDoc(collection(db, 'certifications'), newPostData);
+      setLikedPostIds(prev => [...prev, docRef.id]);
+      onCloseModal();
 
-    confetti({
-      particleCount: 80,
-      spread: 80,
-      origin: { y: 0.5 },
-      colors: ['#059669', '#10b981', '#34d399', '#f59e0b'],
-    });
+      confetti({
+        particleCount: 80,
+        spread: 80,
+        origin: { y: 0.5 },
+        colors: ['#059669', '#10b981', '#34d399', '#f59e0b'],
+      });
 
-    setAuthorName('');
-    setComment('');
+      setAuthorName('');
+      setComment('');
+    } catch (err) {
+      console.error(err);
+      alert('인증 등록 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    }
   };
 
   const filteredPosts = posts.filter(post => {
@@ -222,6 +261,23 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
         </button>
       </div>
 
+      {postsLoading && (
+        <div className="text-center py-12 bg-white rounded-3xl border border-emerald-100">
+          <p className="text-sm text-slate-500 font-medium">인증 게시판을 불러오는 중...</p>
+        </div>
+      )}
+
+      {postsError && (
+        <div className="flex items-start gap-2 p-4 bg-rose-50 rounded-2xl border border-rose-200 text-rose-700">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <p className="text-xs font-medium leading-relaxed">
+            인증 게시판을 불러오지 못했습니다. Firestore 연결 또는 보안 규칙 설정을 확인해주세요.
+          </p>
+        </div>
+      )}
+
+      {!postsLoading && !postsError && (
+      <>
       {/* Filter Tabs */}
       <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
         <div className="flex items-center gap-1.5 shrink-0">
@@ -328,6 +384,8 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
         <div className="text-center py-12 bg-white rounded-3xl border border-emerald-200">
           <p className="text-sm text-slate-500 font-medium">선택한 매장의 인증 게시물이 아직 없습니다.</p>
         </div>
+      )}
+      </>
       )}
 
       {/* Upload Modal */}

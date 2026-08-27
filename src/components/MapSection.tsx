@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search, MapPin, Sparkles, Utensils,
-  CheckCircle, Info, ChevronRight, X, Heart, RefreshCw, Key, ArrowRight, CornerDownRight, Truck, Leaf, Star, ExternalLink
+  CheckCircle, ChevronRight, X, Heart, ArrowRight, CornerDownRight, Truck, Leaf, Star, ExternalLink
 } from 'lucide-react';
 import { Restaurant, FoodCategory } from '../types';
 import { RESTAURANTS_DATA, DONGDEOK_SCHOOL_COORDS } from '../data/mockData';
-import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 interface MapSectionProps {
   onOpenCertModal?: () => void;
 }
+
+// Baked in at build time so every visitor gets the real Naver map automatically.
+const NAVER_CLIENT_ID = import.meta.env.VITE_NAVER_CLIENT_ID as string | undefined;
 
 // Derive each restaurant's fallback-map pin position from its actual lat/lng,
 // keyed by restaurant id so pins stay put regardless of search/filter order.
@@ -37,16 +39,12 @@ export const MapSection: React.FC<MapSectionProps> = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(RESTAURANTS_DATA[0]);
   const [likedRestaurants, setLikedRestaurants] = useState<string[]>([]);
-  const [showNaverKeyModal, setShowNaverKeyModal] = useState(false);
-  const [naverClientId, setNaverClientId] = useState('');
   const [naverMapLoaded, setNaverMapLoaded] = useState(false);
   const [mapMode, setMapMode] = useState<'interactive-vector' | 'naver-sdk'>('interactive-vector');
 
   const naverMapRef = useRef<HTMLDivElement>(null);
   const naverMapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
-
-  useBodyScrollLock(showNaverKeyModal);
 
   // Categories list
   const categories: FoodCategory[] = ['전체', '분식/떡볶이', '마라탕/중식', '포케/샐러드', '한식/도시락', '양식/버거', '카페/디저트'];
@@ -106,7 +104,7 @@ export const MapSection: React.FC<MapSectionProps> = () => {
       }
     };
     script.onerror = () => {
-      alert('네이버 지도 API 로드에 실패했습니다. 기본 인터랙티브 지도로 자동 전환됩니다.');
+      console.error('네이버 지도 API 로드 실패 — 기본 인터랙티브 지도로 대체합니다.');
       setMapMode('interactive-vector');
     };
     document.head.appendChild(script);
@@ -177,24 +175,24 @@ export const MapSection: React.FC<MapSectionProps> = () => {
     }
   }, [mapMode, naverMapLoaded]);
 
+  // Auto-load the real Naver map for every visitor once a Client ID is baked into the build.
+  useEffect(() => {
+    if (NAVER_CLIENT_ID) {
+      loadNaverMaps(NAVER_CLIENT_ID);
+    }
+  }, []);
+
   return (
     <section id="map" className="pt-4 pb-8 sm:py-10 bg-[#F0FAF5] relative border-b-4 border-emerald-100">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         
         {/* Mobile Header Title */}
         <div className="mb-4">
-          <div className="flex items-center justify-between gap-2 mb-1.5">
+          <div className="flex items-center gap-1.5 mb-1.5">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">
               <MapPin className="w-3 h-3 text-emerald-600" />
               <span>동덕여고 반경 500m 다회용기 맛집</span>
             </div>
-            <button
-              onClick={() => setShowNaverKeyModal(true)}
-              className="text-[10px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2 py-1 rounded-lg hover:bg-emerald-50 active:scale-95 transition-all flex items-center gap-1"
-            >
-              <Key className="w-3 h-3 text-emerald-600" />
-              <span>네이버 지도 SDK</span>
-            </button>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             동덕여고 방배동 다회용기 맛집 맵
@@ -577,50 +575,6 @@ export const MapSection: React.FC<MapSectionProps> = () => {
         </div>
 
       </div>
-
-      {/* Naver Maps API Key Modal */}
-      {showNaverKeyModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-emerald-200">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-black text-slate-900 flex items-center gap-1.5">
-                <Key className="w-4 h-4 text-emerald-600" />
-                <span>네이버 지도 Client ID 연동</span>
-              </h3>
-              <button onClick={() => setShowNaverKeyModal(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <p className="text-[11px] text-slate-600 mb-3 leading-relaxed">
-              NAVER Cloud Platform에서 발급받은 <strong>ncpClientId</strong>를 입력하시면 실제 네이버 지도 SDK가 로드됩니다.
-            </p>
-            <input
-              type="text"
-              placeholder="예: ncp_client_id_xxxx"
-              value={naverClientId}
-              onChange={(e) => setNaverClientId(e.target.value)}
-              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono mb-3 focus:outline-hidden focus:border-emerald-500"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  loadNaverMaps(naverClientId);
-                  setShowNaverKeyModal(false);
-                }}
-                className="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-black hover:bg-emerald-700"
-              >
-                적용하기
-              </button>
-              <button
-                onClick={() => setShowNaverKeyModal(false)}
-                className="px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold"
-              >
-                닫기
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </section>
   );
