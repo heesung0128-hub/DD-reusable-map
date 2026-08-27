@@ -37,7 +37,7 @@ const RESTAURANT_PIN_POSITIONS: Record<string, { top: string; left: string }> = 
 export const MapSection: React.FC<MapSectionProps> = () => {
   const [selectedCategory, setSelectedCategory] = useState<FoodCategory>('전체');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(RESTAURANTS_DATA[0]);
+  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [likedRestaurants, setLikedRestaurants] = useState<string[]>([]);
   const [naverMapLoaded, setNaverMapLoaded] = useState(false);
   const [mapMode, setMapMode] = useState<'interactive-vector' | 'naver-sdk'>('interactive-vector');
@@ -45,6 +45,16 @@ export const MapSection: React.FC<MapSectionProps> = () => {
   const naverMapRef = useRef<HTMLDivElement>(null);
   const naverMapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const detailRef = useRef<HTMLDivElement>(null);
+
+  // Selecting a restaurant (from the map or the list) reveals its detail/menu card —
+  // scroll it into view since on mobile it now sits below the full restaurant list.
+  const handleSelectRestaurant = (rest: Restaurant) => {
+    setSelectedRestaurant(rest);
+    setTimeout(() => {
+      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 0);
+  };
 
   // Categories list
   const categories: FoodCategory[] = ['전체', '분식/떡볶이', '마라탕/중식', '포케/샐러드', '한식/도시락', '양식/버거', '카페/디저트'];
@@ -161,7 +171,7 @@ export const MapSection: React.FC<MapSectionProps> = () => {
       });
 
       naver.maps.Event.addListener(marker, 'click', () => {
-        setSelectedRestaurant(r);
+        handleSelectRestaurant(r);
         map.panTo(new naver.maps.LatLng(r.lat, r.lng));
       });
 
@@ -257,11 +267,11 @@ export const MapSection: React.FC<MapSectionProps> = () => {
           </div>
         </div>
 
-        {/* Main Grid: Interactive Map + Selected Restaurant View */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          
+        {/* Main Layout: mobile stacks Map → Full List → Selected Detail (like a delivery app); desktop keeps Map + Detail side by side with the list below */}
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4">
+
           {/* Interactive Map (7 cols on desktop, full width on mobile) */}
-          <div className="lg:col-span-7 flex flex-col">
+          <div className="order-1 lg:col-span-7 flex flex-col">
             <div className="bg-white rounded-2xl sm:rounded-3xl border-4 border-emerald-100 shadow-sm overflow-hidden flex flex-col min-h-[340px] sm:min-h-[460px] relative">
               
               {/* Map Top Bar */}
@@ -319,7 +329,7 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                     return (
                       <div
                         key={rest.id}
-                        onClick={() => setSelectedRestaurant(rest)}
+                        onClick={() => handleSelectRestaurant(rest)}
                         style={{ top: pos.top, left: pos.left }}
                         className="absolute -translate-x-1/2 -translate-y-1/2 z-30 cursor-pointer"
                       >
@@ -355,7 +365,7 @@ export const MapSection: React.FC<MapSectionProps> = () => {
           </div>
 
           {/* Right Column: Selected Restaurant Card & Details (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col space-y-3">
+          <div ref={detailRef} className="order-3 lg:order-2 lg:col-span-5 flex flex-col space-y-3">
             {selectedRestaurant ? (
               <div className="bg-white rounded-2xl sm:rounded-3xl border-2 border-emerald-200 shadow-sm p-4 sm:p-5 flex flex-col justify-between flex-1">
                 
@@ -523,32 +533,24 @@ export const MapSection: React.FC<MapSectionProps> = () => {
               </div>
             ) : (
               <div className="bg-white rounded-2xl p-6 text-center text-xs text-slate-500 border border-emerald-100">
-                지도의 매장 핀을 터치해주세요.
+                아래 목록이나 지도의 매장 핀을 터치해주세요.
               </div>
             )}
           </div>
 
-        </div>
+          {/* Quick Restaurant List Strip for Mobile Thumb Browsing */}
+          <div className="order-2 lg:order-3 lg:col-span-12">
+            <h3 className="text-xs font-black text-slate-900 mb-2 flex items-center gap-1.5">
+              <Utensils className="w-3.5 h-3.5 text-emerald-600" />
+              <span>동덕여고 주변 다회용기 매장 전체 목록</span>
+            </h3>
 
-        {/* Quick Restaurant List Strip for Mobile Thumb Browsing */}
-        <div className="mt-4">
-          <h3 className="text-xs font-black text-slate-900 mb-2 flex items-center gap-1.5">
-            <Utensils className="w-3.5 h-3.5 text-emerald-600" />
-            <span>동덕여고 주변 다회용기 매장 전체 목록</span>
-          </h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-            {filteredRestaurants.map((rest) => (
-              <div
-                key={rest.id}
-                onClick={() => {
-                  setSelectedRestaurant(rest);
-                  const mapElement = document.getElementById('map');
-                  if (mapElement) {
-                    mapElement.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-                className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-2 ${
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              {filteredRestaurants.map((rest) => (
+                <div
+                  key={rest.id}
+                  onClick={() => handleSelectRestaurant(rest)}
+                  className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-2 ${
                   selectedRestaurant?.id === rest.id
                     ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-300'
                     : 'bg-white border-emerald-100 hover:border-emerald-300'
@@ -571,7 +573,9 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                 <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
               </div>
             ))}
+            </div>
           </div>
+
         </div>
 
       </div>
