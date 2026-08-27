@@ -95,7 +95,7 @@ export const MapSection: React.FC<MapSectionProps> = () => {
     const script = document.createElement('script');
     script.id = 'naver-map-script';
     script.type = 'text/javascript';
-    script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${clientId}`;
+    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${clientId}`;
     script.onload = () => {
       if ((window as any).naver && (window as any).naver.maps) {
         setNaverMapLoaded(true);
