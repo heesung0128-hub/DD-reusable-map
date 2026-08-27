@@ -23,7 +23,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               동덕여자고등학교 학생 및 교직원을 위한 다회용기 배달·포장 맛집 지도 & 교내 반납 안내 플랫폼입니다.
             </p>
             <div className="text-slate-500 text-[10px]">
-              서울특별시 서초구 방배로3길 34 (방배동 1017-1) 동덕여자고등학교
+              서울 서초구 효령로2길 123-5 동덕여자중고등학교
             </div>
           </div>
 

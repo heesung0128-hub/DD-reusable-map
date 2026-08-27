@@ -1,10 +1,10 @@
 import { Restaurant, CertificationPost } from '../types';
 
 export const DONGDEOK_SCHOOL_COORDS = {
-  lat: 37.47963,
-  lng: 126.98982,
+  lat: 37.4762104,
+  lng: 126.9923154,
   name: '동덕여자고등학교',
-  address: '서울특별시 서초구 방배로3길 34 (방배동 1017-1)',
+  address: '서울 서초구 효령로2길 123-5 동덕여자중고등학교',
 };
 
 export const RESTAURANTS_DATA: Restaurant[] = [
