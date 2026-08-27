@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { Navbar } from './components/Navbar';
 import { MapSection } from './components/MapSection';
 import { OrderReturnGuide } from './components/OrderReturnGuide';
-import { CertificationGallery } from './components/CertificationGallery';
 import { Footer } from './components/Footer';
 import { ActivePage } from './types';
 import { Camera, MapPin, BookOpen } from 'lucide-react';
+
+// Firebase (used only by the certification gallery) is a heavy dependency —
+// keep it out of the initial bundle so the map page loads fast by default.
+const CertificationGallery = lazy(() =>
+  import('./components/CertificationGallery').then((m) => ({ default: m.CertificationGallery }))
+);
 
 export default function App() {
   const [activePage, setActivePage] = useState<ActivePage>('map');
@@ -44,11 +49,13 @@ export default function App() {
 
         {/* Page 3: 실시간 인증 갤러리 (Gallery Page) */}
         {activePage === 'gallery' && (
-          <CertificationGallery
-            isModalOpen={isCertModalOpen}
-            onCloseModal={() => setIsCertModalOpen(false)}
-            onOpenModal={() => setIsCertModalOpen(true)}
-          />
+          <Suspense fallback={<div className="py-20 text-center text-sm text-slate-500">불러오는 중...</div>}>
+            <CertificationGallery
+              isModalOpen={isCertModalOpen}
+              onCloseModal={() => setIsCertModalOpen(false)}
+              onOpenModal={() => setIsCertModalOpen(true)}
+            />
+          </Suspense>
         )}
 
       </main>

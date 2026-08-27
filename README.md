@@ -1,20 +1,29 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# 동덕여고 '용기내' 지도
 
-# Run and deploy your AI Studio app
+동덕여자고등학교 학생·교직원을 위한 다회용기 배달/포장 맛집 지도, 이용·반납 가이드, 실시간 인증 갤러리 웹 애플리케이션입니다.
 
-This contains everything you need to run your app locally.
+- **맛집 지도**: 학교 근처 다회용기 주문 가능 매장과 대표/저탄소 추천 메뉴 안내
+- **이용 & 반납 가이드**: 다회용기 주문 방법과 교내 반납함 이용 안내
+- **인증 갤러리**: Firebase(Firestore)로 실시간 공유되는 다회용기 이용 인증 게시판
 
-View your app in AI Studio: https://ai.studio/apps/a8beef90-6465-4f5e-a4b4-978a331c660d
+## 로컬 실행
 
-## Run Locally
+**사전 준비:** Node.js
 
-**Prerequisites:**  Node.js
+1. 의존성 설치
+   ```bash
+   npm install
+   ```
+2. `.env.example`을 참고해 `.env` 파일 생성 후 `VITE_NAVER_CLIENT_ID` 값 입력 (네이버지도 Maps 콘솔에서 발급)
+3. 개발 서버 실행
+   ```bash
+   npm run dev
+   ```
 
+## 배포
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+GitHub Pages(`gh-pages` 브랜치)로 배포합니다.
+
+```bash
+npm run deploy
+```

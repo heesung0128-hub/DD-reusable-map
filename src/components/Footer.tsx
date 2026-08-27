@@ -17,7 +17,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold">
                 D
               </div>
-              <span>동덕여자고등학교 '용기내' 에코 클럽</span>
+              <span>동덕여자고등학교 '용기내' 지도</span>
             </div>
             <p className="text-slate-400 leading-relaxed text-[11px] max-w-md xl:max-w-none xl:whitespace-nowrap">
               동덕여자고등학교 학생 및 교직원을 위한 다회용기 배달·포장 맛집 지도 & 교내 반납 안내 플랫폼입니다.
