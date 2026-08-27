@@ -81,6 +81,19 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
     return [];
   });
 
+  // Track which posts this browser created, so only the author can delete their own post
+  const [myPostIds, setMyPostIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem('dongdeok_eco_my_post_ids');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
   const [filterRestaurant, setFilterRestaurant] = useState<string>('전체');
 
   useBodyScrollLock(isModalOpen);
@@ -133,6 +146,14 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
       console.error(e);
     }
   }, [likedPostIds]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('dongdeok_eco_my_post_ids', JSON.stringify(myPostIds));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [myPostIds]);
 
   const presetPhotos = [
     { label: '스텐 마라탕 용기', url: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80' },
@@ -212,6 +233,7 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
     try {
       const docRef = await addDoc(collection(db, 'certifications'), newPostData);
       setLikedPostIds(prev => [...prev, docRef.id]);
+      setMyPostIds(prev => [...prev, docRef.id]);
       onCloseModal();
 
       confetti({
@@ -325,13 +347,15 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
                     {post.gradeClass}
                   </div>
 
-                  <button
-                    onClick={(e) => handleDeletePost(post.id, e)}
-                    className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-black/40 text-white hover:bg-rose-600 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                    title="인증 삭제"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  {myPostIds.includes(post.id) && (
+                    <button
+                      onClick={(e) => handleDeletePost(post.id, e)}
+                      className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-black/40 text-white hover:bg-rose-600 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                      title="내가 올린 인증 삭제"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
 
                 {/* Card Body */}
