@@ -191,11 +191,11 @@ export const MapSection: React.FC<MapSectionProps> = () => {
           <div className="flex items-center gap-1.5 mb-1.5">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">
               <MapPin className="w-3 h-3 text-emerald-600" />
-              <span>동덕여고 반경 500m 다회용기 맛집</span>
+              <span>동덕여고 근처 다회용기 맛집</span>
             </div>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            동덕여고 방배동 다회용기 맛집 맵
+            동덕여고 근처 다회용기 맛집 맵
           </h2>
           <p className="text-xs text-slate-600 mt-0.5">
             주문 시 <strong>[다회용기 사용]</strong>을 고르면 살균 용기에 담겨오며, 다 먹고 교내 수거함에 반납하는 매장들입니다.

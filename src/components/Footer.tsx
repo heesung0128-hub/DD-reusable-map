@@ -19,7 +19,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               </div>
               <span>동덕여자고등학교 '용기내' 에코 클럽</span>
             </div>
-            <p className="text-slate-400 leading-relaxed text-[11px] max-w-md">
+            <p className="text-slate-400 leading-relaxed text-[11px] max-w-md xl:max-w-none xl:whitespace-nowrap">
               동덕여자고등학교 학생 및 교직원을 위한 다회용기 배달·포장 맛집 지도 & 교내 반납 안내 플랫폼입니다.
             </p>
             <div className="text-slate-500 text-[10px]">
@@ -35,7 +35,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <ul className="space-y-1 text-slate-400 text-[11px]">
               <li>
                 <button onClick={() => onNavigate('map')} className="hover:text-emerald-400">
-                  방배동 다회용기 맛집 지도
+                  동덕여고 근처 다회용기 맛집 지도
                 </button>
               </li>
               <li>
@@ -69,7 +69,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <span>📍 반납 장소: 교내 다회용기 전용 반납함</span>
             <span>✨ 설거지 없이 뚜껑만 닫아 반납</span>
           </div>
-          <div className="text-slate-400">© 2026 동덕여자고등학교 ECO 실천 클럽</div>
+          <div className="text-slate-400">2026 동덕여자고등학교 기후행동 365+</div>
         </div>
 
       </div>

@@ -1,5 +1,5 @@
 {
-  "name": "동덕여고 '용기내' 지도 & ECO 실천 클럽",
+  "name": "동덕여고 '용기내' 지도",
   "description": "동덕여자고등학교 맞춤형 다회용기 배달/포장 맛집 지도, 탄소 저감 환경 영향 계산기, 위생·영양 가이드 및 실시간 패들렛 인증 갤러리 웹 애플리케이션",
   "requestFramePermissions": ["geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

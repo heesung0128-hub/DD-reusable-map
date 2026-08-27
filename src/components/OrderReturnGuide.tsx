@@ -74,7 +74,7 @@ export const OrderReturnGuide: React.FC<OrderReturnGuideProps> = ({ onGoToMap, o
     <div className="py-6 sm:py-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="text-center max-w-2xl mx-auto">
+      <div className="text-center max-w-2xl lg:max-w-none mx-auto">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black mb-2">
           <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
           <span>동덕여고 다회용기 이용 & 반납 가이드</span>
@@ -82,7 +82,7 @@ export const OrderReturnGuide: React.FC<OrderReturnGuideProps> = ({ onGoToMap, o
         <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
           용기 준비 없이 주문하고, 교내에서 간편 반납!
         </h2>
-        <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed lg:whitespace-nowrap">
           가게에서 깨끗한 다회용기에 담아 보내주고, 식사 후 교내 반납함에 뚜껑만 닫아 넣으면 끝나는 초간단 에코 라이프입니다.
         </p>
       </div>
@@ -222,7 +222,7 @@ export const OrderReturnGuide: React.FC<OrderReturnGuideProps> = ({ onGoToMap, o
           onClick={onGoToMap}
           className="flex-1 py-3.5 px-4 rounded-2xl bg-emerald-600 text-white font-black text-sm shadow-md hover:bg-emerald-700 active:scale-98 transition-all flex items-center justify-center gap-2"
         >
-          <span>방배동 다회용기 맛집 지도 보러가기</span>
+          <span>동덕여고 근처 다회용기 맛집 지도 보러가기</span>
           <ArrowRight className="w-4 h-4" />
         </button>
 
