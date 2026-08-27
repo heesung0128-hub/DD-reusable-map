@@ -66,7 +66,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         {/* Bottom Banner */}
         <div className="p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/60 flex flex-wrap items-center justify-between gap-2 text-[10px] sm:text-[11px] text-emerald-300">
           <div className="flex items-center gap-3">
-            <span>📍 반납 장소: 본관 1층 / 급식실 앞 / 후문 수거함</span>
+            <span>📍 반납 장소: 교내 다회용기 전용 반납함</span>
             <span>✨ 설거지 없이 뚜껑만 닫아 반납</span>
           </div>
           <div className="text-slate-400">© 2026 동덕여자고등학교 ECO 실천 클럽</div>

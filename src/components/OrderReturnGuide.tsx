@@ -1,5 +1,5 @@
 import React from 'react';
-import { Smartphone, Utensils, RotateCcw, ShieldCheck, MapPin, CheckCircle2, CornerDownRight, Sparkles, ArrowRight } from 'lucide-react';
+import { Smartphone, Utensils, RotateCcw, ShieldCheck, MapPin, CheckCircle2, CornerDownRight, Sparkles, ArrowRight, Search, Camera } from 'lucide-react';
 
 interface OrderReturnGuideProps {
   onGoToMap: () => void;
@@ -58,28 +58,17 @@ export const OrderReturnGuide: React.FC<OrderReturnGuideProps> = ({ onGoToMap, o
     {
       icon: '📍 📦',
       title: '3. 교내 전용 반납함에 넣기',
-      desc: '동덕여고 본관 1층 중앙 현관, 급식실 앞, 후문 경비실 옆 수거함에 넣어주세요.',
+      desc: '동덕여고 교내 다회용기 전용 반납함에 넣어주세요.',
       point: '※ 일반 쓰레기통이나 분리수거함에 버리지 마세요.',
     },
   ];
 
-  const returnSpots = [
-    {
-      spot: '본관 1층 중앙 현관',
-      desc: '중앙 출입구 신발장 옆 다회용기 전용 수거함',
-      target: '1·2·3학년 교실 및 교무실 접근 편리',
-    },
-    {
-      spot: '급식실 입구 회수대',
-      desc: '급식실 앞 잔반 처리 구역 옆 초록색 반납 부스',
-      target: '점심 및 석식 후 바로 반납 최적',
-    },
-    {
-      spot: '후문 경비실 옆 수거함',
-      desc: '후문 통학로 및 에코 카페 방향 출구 앞',
-      target: '등하굣길 및 방과 후 야자 픽업 후 반납',
-    },
-  ];
+  // TODO: 정확한 반납함 위치 확정되면 name/description/photoUrl을 교체해주세요.
+  const returnSpot = {
+    name: '반납함 위치 (추후 안내 예정)',
+    description: '정확한 반납함 위치와 이용 안내가 이곳에 표시됩니다.',
+    photoUrl: '',
+  };
 
   return (
     <div className="py-6 sm:py-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 animate-in fade-in duration-300">
@@ -96,6 +85,19 @@ export const OrderReturnGuide: React.FC<OrderReturnGuideProps> = ({ onGoToMap, o
         <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
           가게에서 깨끗한 다회용기에 담아 보내주고, 식사 후 교내 반납함에 뚜껑만 닫아 넣으면 끝나는 초간단 에코 라이프입니다.
         </p>
+      </div>
+
+      {/* Delivery App Search Tip */}
+      <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-4 sm:p-5 flex items-start gap-3">
+        <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+          <Search className="w-4.5 h-4.5" />
+        </div>
+        <div>
+          <p className="text-sm font-black text-emerald-950">배달앱에서 매장을 더 쉽게 찾는 법</p>
+          <p className="text-xs sm:text-sm text-emerald-900 mt-1 leading-relaxed">
+            배달앱(배달의민족, 요기요, 쿠팡이츠 등) 검색창에 <strong>"다회용기"</strong>를 검색하면 다회용기 주문이 가능한 매장들이 바로 모아서 나옵니다!
+          </p>
+        </div>
       </div>
 
       {/* 1. 4-Step Reusable System Flow */}
@@ -164,25 +166,25 @@ export const OrderReturnGuide: React.FC<OrderReturnGuideProps> = ({ onGoToMap, o
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          {returnSpots.map((spot, idx) => (
-            <div key={idx} className="bg-emerald-900/80 rounded-2xl p-4 border border-emerald-700/80 flex flex-col justify-between">
-              <div>
-                <div className="text-xs font-black text-emerald-300 mb-1 flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center">
-                    {idx + 1}
-                  </span>
-                  <span>{spot.spot}</span>
-                </div>
-                <p className="text-xs text-white font-medium leading-relaxed mb-2">
-                  {spot.desc}
-                </p>
+        <div className="bg-emerald-900/80 rounded-2xl p-4 sm:p-5 border border-emerald-700/80 flex flex-col sm:flex-row gap-4">
+          <div className="sm:w-56 shrink-0 aspect-4/3 sm:aspect-square rounded-xl overflow-hidden border border-emerald-700/80 bg-emerald-950/50 flex items-center justify-center">
+            {returnSpot.photoUrl ? (
+              <img src={returnSpot.photoUrl} alt={returnSpot.name} className="w-full h-full object-cover" />
+            ) : (
+              <div className="flex flex-col items-center gap-1.5 text-emerald-400/70 p-4 text-center">
+                <Camera className="w-6 h-6" />
+                <span className="text-[10px] font-bold">반납함 사진 추가 예정</span>
               </div>
-              <div className="text-[11px] text-emerald-300/90 bg-emerald-950/60 p-2 rounded-xl border border-emerald-800">
-                🎯 {spot.target}
-              </div>
+            )}
+          </div>
+          <div className="flex flex-col justify-center">
+            <div className="text-sm sm:text-base font-black text-white mb-1.5">
+              {returnSpot.name}
             </div>
-          ))}
+            <p className="text-xs sm:text-sm text-emerald-100 font-medium leading-relaxed">
+              {returnSpot.description}
+            </p>
+          </div>
         </div>
       </div>
 

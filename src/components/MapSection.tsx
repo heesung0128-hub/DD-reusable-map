@@ -3,7 +3,7 @@ import {
   Search, MapPin, Sparkles, Utensils, 
   Phone, Clock, Award, CheckCircle, Info, ChevronRight, X, Heart, Shield, RefreshCw, Key, ArrowRight, CornerDownRight
 } from 'lucide-react';
-import { Restaurant, FoodCategory, EcoGrade, MenuItem } from '../types';
+import { Restaurant, FoodCategory } from '../types';
 import { RESTAURANTS_DATA, DONGDEOK_SCHOOL_COORDS } from '../data/mockData';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
@@ -76,7 +76,6 @@ export const MapSection: React.FC<MapSectionProps> = () => {
     const matchSearch = 
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
       item.menus.some(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()));
     
     return matchCategory && matchSearch;

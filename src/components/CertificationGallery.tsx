@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Camera, Heart, Sparkles, CheckCircle, Shield, 
+import {
+  Camera, Heart, Sparkles, CheckCircle,
   X, Send, Trash2, Filter
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -93,7 +93,6 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
   const [gradeClass, setGradeClass] = useState('동덕여고 2학년 3반');
   const [selectedRest, setSelectedRest] = useState(RESTAURANTS_DATA[0].name);
   const [menuName, setMenuName] = useState('에코 마라탕 / 떡볶이');
-  const [containerType, setContainerType] = useState('가게 제공 스테인리스 보온용기');
   const [comment, setComment] = useState('');
   const [photoUrl, setPhotoUrl] = useState('https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80');
 
@@ -169,7 +168,6 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
       gradeClass: gradeClass.trim() || '동덕여자고등학교',
       restaurantName: selectedRest,
       menuName: menuName.trim() || '다회용기 메뉴',
-      containerType: containerType,
       photoUrl: photoUrl,
       comment: comment.trim(),
       likes: 1,
@@ -299,11 +297,6 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
                   <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100 line-clamp-3">
                     "{post.comment}"
                   </p>
-
-                  <div className="p-2 bg-emerald-50 rounded-xl text-[11px] text-emerald-900 font-bold flex items-center gap-1.5 border border-emerald-100">
-                    <Shield className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span className="truncate">{post.containerType}</span>
-                  </div>
                 </div>
               </div>
 
@@ -394,15 +387,19 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
                   <label className="block text-[10px] font-black text-slate-700 mb-1 uppercase">
                     이용한 매장
                   </label>
-                  <select
+                  <input
+                    type="text"
+                    list="cert-restaurant-options"
                     value={selectedRest}
                     onChange={(e) => setSelectedRest(e.target.value)}
+                    placeholder="매장명 입력 또는 선택"
                     className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
-                  >
+                  />
+                  <datalist id="cert-restaurant-options">
                     {RESTAURANTS_DATA.map(r => (
-                      <option key={r.id} value={r.name}>{r.name}</option>
+                      <option key={r.id} value={r.name} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
 
                 <div>
@@ -417,23 +414,6 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
                     className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-slate-700 mb-1 uppercase">
-                  제공받은 다회용기 종류
-                </label>
-                <select
-                  value={containerType}
-                  onChange={(e) => setContainerType(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
-                >
-                  <option value="가게 제공 스테인리스 보온용기">가게 제공 스테인리스 보온용기</option>
-                  <option value="가게 제공 BPA-Free 밀폐 다회용기">가게 제공 BPA-Free 밀폐 다회용기</option>
-                  <option value="가게 제공 오븐형 내열유리용기">가게 제공 오븐형 내열유리용기</option>
-                  <option value="가게 제공 에코 샐러드 보울">가게 제공 에코 샐러드 보울</option>
-                  <option value="안심 다회용 컵">안심 다회용 컵</option>
-                </select>
               </div>
 
               {/* Photo Upload & Presets */}
