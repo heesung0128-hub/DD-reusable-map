@@ -219,9 +219,9 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     category: '마라탕/중식',
     distanceMeters: 2500,
     deliveryMinutes: 42,
-    lat: 37.48818,
-    lng: 127.01751,
-    address: '서울특별시 서초구 서초동 1570-6',
+    lat: 37.491723,
+    lng: 127.012469,
+    address: '서울 서초구 반포대로28길 76 2층',
     phone: '0507-1310-3169',
     baeminUrl: 'https://s.baemin.com/x9000fLivQ6sm',
     containerSupport: {
@@ -313,7 +313,7 @@ export const RESTAURANTS_DATA: Restaurant[] = [
       returnSpot: '동덕여고 본관 1층 수거함',
     },
     menus: [
-      { id: 'm14-1', name: '짜파구리', price: 10000, carbonKg: 0.8 },
+      { id: 'm14-1', name: '짜파구리', price: 10000, carbonKg: 0.8, recommendationTag: '저탄소' },
       { id: 'm14-2', name: '1인 항정+삼겹 도시락', price: 23900, carbonKg: 3.5 },
       { id: 'm14-3', name: '참치마요덮밥', price: 8000, carbonKg: 1.1 },
       { id: 'm14-4', name: '불보쌈덮밥', price: 14900, carbonKg: 2.5 },
@@ -359,7 +359,7 @@ export const RESTAURANTS_DATA: Restaurant[] = [
       returnSpot: '동덕여고 본관 1층 수거함',
     },
     menus: [
-      { id: 'm16-1', name: '홍짬뽕', price: 12000, carbonKg: 1.1 },
+      { id: 'm16-1', name: '홍짬뽕', price: 12000, carbonKg: 1.1, recommendationTag: '대표메뉴' },
       { id: 'm16-2', name: '간짜장', price: 10000, carbonKg: 1.5 },
       { id: 'm16-3', name: '잡채밥', price: 11000, carbonKg: 2.2 },
       { id: 'm16-4', name: '볶음밥', price: 10500, carbonKg: 1.2 },
@@ -375,7 +375,7 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     lat: 37.4897034,
     lng: 126.9872722,
     address: '서울특별시 서초구 방배중앙로 119',
-    phone: 'X',
+    phone: '',
     baeminUrl: 'https://s.baemin.com/ct000g1R0KvtX',
     containerSupport: {
       system: '주문 시 [다회용기] 무료 선택',
@@ -422,7 +422,7 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     lng: 126.9530317,
     address: '서울특별시 관악구 관악로 195',
     phone: '02-877-0507',
-    baeminUrl: '',
+    baeminUrl: 'https://s.baemin.com/tF000fDpxzsM3',
     containerSupport: {
       system: '주문 시 [다회용기] 무료 선택',
       returnSpot: '동덕여고 본관 1층 수거함',
@@ -487,9 +487,9 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     category: '한식/도시락',
     distanceMeters: 4200,
     deliveryMinutes: 11,
-    lat: 37.48818,
-    lng: 127.01751,
-    address: '서울 서초구 서초동 1660-27',
+    lat: 37.4927099,
+    lng: 127.0159225,
+    address: '서울 서초구 서초중앙로20길 34-6',
     phone: '0507-1348-9827',
     baeminUrl: 'https://s.baemin.com/Dm000h0BkGNkm',
     containerSupport: {

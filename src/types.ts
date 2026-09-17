@@ -10,7 +10,6 @@ export interface MenuItem {
   price: number;
   carbonKg?: number;
   recommendationTag?: MenuRecommendationTag;
-  image?: string;
 }
 
 export interface Restaurant {

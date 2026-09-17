@@ -426,7 +426,10 @@ export const MapSection: React.FC<MapSectionProps> = () => {
 
                   {/* Store Address & Baemin Order Button */}
                   <div className="flex items-center justify-between gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200 text-[11px] mb-3">
-                    <span className="text-slate-600 truncate">{selectedRestaurant.address} · {selectedRestaurant.phone}</span>
+                    <span className="text-slate-600 truncate">
+                      {selectedRestaurant.address}
+                      {selectedRestaurant.phone && ` · ${selectedRestaurant.phone}`}
+                    </span>
                     {selectedRestaurant.baeminUrl ? (
                       <a
                         href={selectedRestaurant.baeminUrl}
@@ -464,17 +467,6 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                               }`}
                             >
                               <div className="flex items-center gap-2 min-w-0">
-                                {menu.image ? (
-                                  <img
-                                    src={menu.image}
-                                    alt={menu.name}
-                                    className="w-10 h-10 rounded-lg object-cover shrink-0"
-                                  />
-                                ) : (
-                                  <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0 text-base">
-                                    🍽️
-                                  </div>
-                                )}
                                 <div className="min-w-0">
                                   <div className="font-bold text-slate-900 text-xs leading-tight truncate">
                                     {menu.name}
@@ -518,17 +510,6 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                           className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2 text-xs"
                         >
                           <div className="flex items-center gap-2">
-                            {menu.image ? (
-                              <img
-                                src={menu.image}
-                                alt={menu.name}
-                                className="w-10 h-10 rounded-lg object-cover shrink-0"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center shrink-0 text-base">
-                                🍽️
-                              </div>
-                            )}
                             <div>
                               <div className="font-bold text-slate-900 text-xs leading-tight">
                                 {menu.name}
