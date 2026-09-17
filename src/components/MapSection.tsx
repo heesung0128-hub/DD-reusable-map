@@ -427,15 +427,21 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                   {/* Store Address & Baemin Order Button */}
                   <div className="flex items-center justify-between gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200 text-[11px] mb-3">
                     <span className="text-slate-600 truncate">{selectedRestaurant.address} · {selectedRestaurant.phone}</span>
-                    <a
-                      href={selectedRestaurant.baeminUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold shrink-0 hover:bg-emerald-700 flex items-center gap-1 active:scale-95 transition-all text-[11px]"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      <span>배민 주문</span>
-                    </a>
+                    {selectedRestaurant.baeminUrl ? (
+                      <a
+                        href={selectedRestaurant.baeminUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold shrink-0 hover:bg-emerald-700 flex items-center gap-1 active:scale-95 transition-all text-[11px]"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        <span>배민 주문</span>
+                      </a>
+                    ) : (
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-500 font-bold shrink-0 text-[11px]">
+                        배민 링크 준비 중
+                      </span>
+                    )}
                   </div>
 
                   {/* Recommended Menu Highlights */}
@@ -458,11 +464,17 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                               }`}
                             >
                               <div className="flex items-center gap-2 min-w-0">
-                                <img
-                                  src={menu.image}
-                                  alt={menu.name}
-                                  className="w-10 h-10 rounded-lg object-cover shrink-0"
-                                />
+                                {menu.image ? (
+                                  <img
+                                    src={menu.image}
+                                    alt={menu.name}
+                                    className="w-10 h-10 rounded-lg object-cover shrink-0"
+                                  />
+                                ) : (
+                                  <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0 text-base">
+                                    🍽️
+                                  </div>
+                                )}
                                 <div className="min-w-0">
                                   <div className="font-bold text-slate-900 text-xs leading-tight truncate">
                                     {menu.name}
@@ -506,11 +518,17 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                           className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2 text-xs"
                         >
                           <div className="flex items-center gap-2">
-                            <img
-                              src={menu.image}
-                              alt={menu.name}
-                              className="w-10 h-10 rounded-lg object-cover shrink-0"
-                            />
+                            {menu.image ? (
+                              <img
+                                src={menu.image}
+                                alt={menu.name}
+                                className="w-10 h-10 rounded-lg object-cover shrink-0"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center shrink-0 text-base">
+                                🍽️
+                              </div>
+                            )}
                             <div>
                               <div className="font-bold text-slate-900 text-xs leading-tight">
                                 {menu.name}

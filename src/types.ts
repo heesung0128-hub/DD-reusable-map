@@ -10,7 +10,7 @@ export interface MenuItem {
   price: number;
   carbonKg?: number;
   recommendationTag?: MenuRecommendationTag;
-  image: string;
+  image?: string;
 }
 
 export interface Restaurant {
@@ -29,7 +29,6 @@ export interface Restaurant {
     returnSpot: string;
   };
   menus: MenuItem[];
-  openHours: string;
 }
 
 export interface CertificationPost {
