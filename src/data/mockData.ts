@@ -251,7 +251,15 @@ export const RESTAURANTS_DATA: Restaurant[] = [
       system: '주문 시 [다회용기] 무료 선택',
       returnSpot: '동덕여고 본관 1층 수거함',
     },
-    menus: [],
+    menus: [
+      { id: 'm11-1', name: '야채마라탕(1~2인분)', price: 14900, recommendationTag: '대표메뉴' },
+      { id: 'm11-2', name: '마라상궈(새우/오징어, 1~2인분)', price: 18900, recommendationTag: '대표메뉴' },
+      { id: 'm11-3', name: '꿔바로우(중)', price: 14000 },
+      { id: 'm11-4', name: '마라탕(고기선택)', price: 18900 },
+      { id: 'm11-5', name: '마라불맛제육(300g)', price: 16000 },
+      { id: 'm11-6', name: '중국냉면', price: 14000, recommendationTag: '대표메뉴' },
+      { id: 'm11-7', name: '마파두부', price: 15000 },
+    ],
   },
   {
     id: 'rest-12',
@@ -518,7 +526,15 @@ export const RESTAURANTS_DATA: Restaurant[] = [
       system: '주문 시 [다회용기] 무료 선택',
       returnSpot: '동덕여고 본관 1층 수거함',
     },
-    menus: [],
+    menus: [
+      { id: 'm23-1', name: '야채마라탕(1~2인분)', price: 14900, recommendationTag: '대표메뉴' },
+      { id: 'm23-2', name: '마라상궈(새우/오징어, 1~2인분)', price: 18900, recommendationTag: '대표메뉴' },
+      { id: 'm23-3', name: '꿔바로우(중)', price: 14000 },
+      { id: 'm23-4', name: '마라탕(고기선택)', price: 18900 },
+      { id: 'm23-5', name: '마라불맛제육(300g)', price: 16000 },
+      { id: 'm23-6', name: '중국냉면', price: 14000, recommendationTag: '대표메뉴' },
+      { id: 'm23-7', name: '마파두부', price: 15000 },
+    ],
   },
 ];
 
