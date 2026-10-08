@@ -9,7 +9,7 @@
 - 목적: 동덕여고 학생·교직원이 학교 근처 다회용기 주문 가능 식당을 지도에서 찾고, 이용·반납 방법을 확인하고, 인증을 공유하는 웹앱
 - 배포 주소: https://heesung0128-hub.github.io/DD-reusable-map/
 - 기술 스택: React 19 + TypeScript + Vite, Tailwind CSS, Firebase(Firestore, 인증 갤러리), 네이버 지도 API, GitHub Pages 배포
-- 실행 방법: `npm install` → `.env` 만들기(`.env.example` 참고, 값은 선생님께 문의) → `npm run dev` (http://localhost:3000)
+- 실행 방법: `npm install` → `.env` 만들기(`.env.example` 참고, 값은 선생님께 문의) → `npm run dev` (http://localhost:3000/DD-reusable-map/)
 
 ## 2. 개발자와 역할
 
@@ -34,7 +34,7 @@
 ## 4. 수정 금지 파일
 
 - `AGENTS.md`, `CLAUDE.md` (선생님만)
-- `.env`, `.env.*`
+- `.env`, `.env.*` (단, `.env.example`에는 6번 규칙대로 새 환경변수 이름을 추가할 수 있음)
 - `src/lib/firebase.ts` (Firebase 연결 설정)
 - `vite.config.ts` (배포 경로 설정. 잘못 바꾸면 배포된 사이트가 열리지 않음)
 
@@ -76,3 +76,18 @@ AI는 작업을 시작할 때 다음을 확인하고 사용자에게 짧게 알�
 
 1. 최신 상태로 pull 되어 있는가?
 2. 수정할 파일 목록은 무엇인가? 요청 범위 밖이거나 공용 파일이 있으면 수정 전에 먼저 알림
+
+## 11. 배포
+
+- 학생도 직접 배포할 수 있음. 선생님 승인은 필요 없고, 선생님은 배포된 결과를 확인함.
+- 배포는 사용자가 요청할 때만 할 것. 명령어: `npm run deploy`
+- 배포 전에 반드시 확인할 것: ① `git pull`로 최신 상태인지 ② `npm run lint`, `npm run build`가 오류 없이 끝나는지 ③ 배포할 변경 내용이 `main`에 푸시되어 있는지
+- 푸시하지 않은 코드나 오래된 코드로 배포하지 말 것. 사이트가 이전 상태로 덮어써짐.
+- 배포가 끝나면 배포 주소를 열어 정상 동작을 확인하고 사용자에게 알릴 것.
+- 배포 후 문제가 생기면 `git revert`로 되돌린 뒤 다시 배포할 것.
+
+## 12. 식당 데이터 추가·수정
+
+- 식당·메뉴 데이터는 `src/data/mockData.ts`의 `RESTAURANTS_DATA`에 있음. 추가·수정 방법은 `README.md`의 "식당 추가하기"를 따를 것.
+- 요청받은 식당만 고치고, 다른 식당의 값은 바꾸지 말 것.
+- 가격·탄소배출량·거리·배달시간 등 숫자는 사용자(엑셀)가 준 값을 그대로 쓰고 임의로 지어내지 말 것. 값이 없으면 비워두고 사용자에게 물을 것.
