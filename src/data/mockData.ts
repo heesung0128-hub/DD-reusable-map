@@ -1,4 +1,4 @@
-import { Restaurant, CertificationPost } from '../types';
+import { Restaurant } from '../types';
 
 export const DONGDEOK_SCHOOL_COORDS = {
   lat: 37.4762104,
@@ -531,56 +531,5 @@ export const RESTAURANTS_DATA: Restaurant[] = [
       { id: 'm23-4', name: '비빔냉면 (보통)', price: 11000, carbonKg: 0.6, recommendationTag: '저탄소' },
       { id: 'm23-5', name: '마라불맛제육 (300g)', price: 16000, carbonKg: 2.5 },
     ],
-  },
-];
-
-export const INITIAL_CERTIFICATION_POSTS: CertificationPost[] = [
-  {
-    id: 'post-1',
-    studentName: '김민서 (환경동아리)',
-    gradeClass: '동덕여고 2학년 3반',
-    restaurantName: '저육당 사당본점',
-    menuName: '저당직화제육 1.5인밥상',
-    photoUrl: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
-    comment: '배달앱에서 [다회용기] 체크해서 주문했어요! 스텐 보온통에 담겨와서 1도 안 식고 국물도 안 샜음 🍲 먹고 본관 1층 수거함에 뚜껑 닫아서 쏙 반납했습니다!',
-    likes: 38,
-    date: '2026-08-25',
-    verified: true,
-  },
-  {
-    id: 'post-2',
-    studentName: '이지우 & 박서연',
-    gradeClass: '동덕여고 1학년 5반',
-    restaurantName: '행복로제떡볶이&닭발',
-    menuName: '로제떡볶이',
-    photoUrl: 'https://images.unsplash.com/photo-1627042633145-b780d842ba45?auto=format&fit=crop&w=600&q=80',
-    comment: '야자 전에 친구랑 다회용기 포장으로 주문했어요! 플라스틱 쓰레기 안 나와서 넘 편해요. 본관 1층 수거함에 넣으면 끝 ✨',
-    likes: 24,
-    date: '2026-08-24',
-    verified: true,
-  },
-  {
-    id: 'post-3',
-    studentName: '정수아',
-    gradeClass: '동덕여고 3학년 1반',
-    restaurantName: '샐러드식당 관악봉천점',
-    menuName: '치킨 텐더 샐러드',
-    photoUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
-    comment: '수능 공부하느라 건강한 점심으로 샐러드 주문! 다회용기에 깔끔하게 담겨오고 세척할 필요 없이 반납함에 쏙!',
-    likes: 42,
-    date: '2026-08-23',
-    verified: true,
-  },
-  {
-    id: 'post-4',
-    studentName: '최예은',
-    gradeClass: '동덕여고 2학년 7반',
-    restaurantName: '텍사스 파파 크레페 서울대입구역점',
-    menuName: '딸바 크레페',
-    photoUrl: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80',
-    comment: '다회용기로 테이크아웃! 일회용 쓰레기 걱정 없이 반납함에 넣으니 진짜 편해요 🥤',
-    likes: 31,
-    date: '2026-08-22',
-    verified: true,
   },
 ];

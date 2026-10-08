@@ -1,5 +1,5 @@
 import React from 'react';
-import { Smartphone, Utensils, RotateCcw, ShieldCheck, MapPin, CheckCircle2, CornerDownRight, Sparkles, ArrowRight, Search, Camera } from 'lucide-react';
+import { Smartphone, Utensils, RotateCcw, ShieldCheck, MapPin, Sparkles, ArrowRight, Search, Camera } from 'lucide-react';
 
 interface OrderReturnGuideProps {
   onGoToMap: () => void;

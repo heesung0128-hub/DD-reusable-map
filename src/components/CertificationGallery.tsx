@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Camera, Heart, Sparkles, CheckCircle,
+  Camera, Heart, CheckCircle,
   X, Send, Trash2, Filter, AlertCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';

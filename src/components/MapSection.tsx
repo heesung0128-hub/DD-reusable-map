@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search, MapPin, Sparkles, Utensils,
-  CheckCircle, ChevronRight, X, Heart, ArrowRight, CornerDownRight, Truck, Leaf, Star, ExternalLink
+  CheckCircle, ChevronRight, X, Heart, CornerDownRight, Truck, Leaf, Star, ExternalLink
 } from 'lucide-react';
 import { Restaurant, FoodCategory } from '../types';
 import { RESTAURANTS_DATA, DONGDEOK_SCHOOL_COORDS } from '../data/mockData';
@@ -46,6 +46,7 @@ export const MapSection: React.FC<MapSectionProps> = () => {
   const naverMapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const detailRef = useRef<HTMLDivElement>(null);
+  const naverAuthFailedRef = useRef(false);
 
   // Selecting a restaurant (from the map or the list) reveals its detail/menu card —
   // scroll it into view since on mobile it now sits below the full restaurant list.
@@ -102,11 +103,21 @@ export const MapSection: React.FC<MapSectionProps> = () => {
     const existingScript = document.getElementById('naver-map-script');
     if (existingScript) existingScript.remove();
 
+    // 네이버 인증 실패(등록하지 않은 주소 등) 시 빈 회색 지도 대신 간단 지도로 대체
+    naverAuthFailedRef.current = false;
+    (window as any).navermap_authFailure = () => {
+      console.error('네이버 지도 인증 실패 — 네이버 콘솔의 서비스 URL에 현재 주소가 등록되어 있는지 확인하세요. 간단 지도로 대체합니다.');
+      naverAuthFailedRef.current = true;
+      setNaverMapLoaded(false);
+      setMapMode('interactive-vector');
+    };
+
     const script = document.createElement('script');
     script.id = 'naver-map-script';
     script.type = 'text/javascript';
     script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${clientId}`;
     script.onload = () => {
+      if (naverAuthFailedRef.current) return;
       if ((window as any).naver && (window as any).naver.maps) {
         setNaverMapLoaded(true);
         setMapMode('naver-sdk');
