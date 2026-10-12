@@ -7,7 +7,7 @@
 
 - 이름: 동덕여고 '용기내' 지도
 - 목적: 동덕여고 학생·교직원이 학교 근처 다회용기 주문 가능 식당을 지도에서 찾고, 이용·반납 방법을 확인하고, 인증을 공유하는 웹앱
-- 배포 주소: Vercel이 자동 배포함 (실제 주소는 Vercel 대시보드의 Domains에서 확인)
+- 배포 주소: https://dd-reusable-map.vercel.app/ (Vercel 자동 배포)
 - 기술 스택: React 19 + TypeScript + Vite, Tailwind CSS, Firebase(Firestore, 인증 갤러리), 네이버 지도 API, Vercel 배포
 - 실행 방법: `npm install` → `.env` 만들기(`.env.example` 참고, 값은 선생님께 문의) → `npm run dev` (http://localhost:3000/)
 
