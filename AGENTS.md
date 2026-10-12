@@ -7,9 +7,9 @@
 
 - 이름: 동덕여고 '용기내' 지도
 - 목적: 동덕여고 학생·교직원이 학교 근처 다회용기 주문 가능 식당을 지도에서 찾고, 이용·반납 방법을 확인하고, 인증을 공유하는 웹앱
-- 배포 주소: https://heesung0128-hub.github.io/DD-reusable-map/
-- 기술 스택: React 19 + TypeScript + Vite, Tailwind CSS, Firebase(Firestore, 인증 갤러리), 네이버 지도 API, GitHub Pages 배포
-- 실행 방법: `npm install` → `.env` 만들기(`.env.example` 참고, 값은 선생님께 문의) → `npm run dev` (http://localhost:3000/DD-reusable-map/)
+- 배포 주소: Vercel이 자동 배포함 (실제 주소는 Vercel 대시보드의 Domains에서 확인)
+- 기술 스택: React 19 + TypeScript + Vite, Tailwind CSS, Firebase(Firestore, 인증 갤러리), 네이버 지도 API, Vercel 배포
+- 실행 방법: `npm install` → `.env` 만들기(`.env.example` 참고, 값은 선생님께 문의) → `npm run dev` (http://localhost:3000/)
 
 ## 2. 개발자와 역할
 
@@ -36,7 +36,7 @@
 - `AGENTS.md`, `CLAUDE.md` (선생님만)
 - `.env`, `.env.*` (단, `.env.example`에는 6번 규칙대로 새 환경변수 이름을 추가할 수 있음)
 - `src/lib/firebase.ts` (Firebase 연결 설정)
-- `vite.config.ts` (배포 경로 설정. 잘못 바꾸면 배포된 사이트가 열리지 않음)
+- `vite.config.ts` (빌드 설정. 잘못 바꾸면 사이트가 빌드·배포되지 않음)
 
 ## 5. 코드 스타일
 
@@ -49,7 +49,10 @@
 
 - API 키, 비밀번호, 토큰을 코드에 직접 쓰지 말 것. `.env`에 두고 환경변수로 불러올 것.
 - `.env`는 커밋하지 않음(`.gitignore`에 등록되어 있음). 새 환경변수가 필요하면 `.env.example`에 이름만(값 없이) 추가하고 사용자에게 알릴 것.
-- 예외: `src/lib/firebase.ts`의 Firebase 웹 설정값(apiKey 등)은 원래 공개되어도 되는 값이라 코드에 직접 들어 있음. 비밀 정보로 오해해서 `.env`로 옮기거나 지우거나 고치지 말 것(이 파일은 수정 금지). Firestore 데이터 접근은 Firebase 콘솔의 보안 규칙으로 관리함.
+- 브라우저에서 실행되는 사이트 코드에 들어가는 값은 누구나 볼 수 있으므로 비밀이 아님. 두 종류를 구분할 것.
+  - 공개용 값(사이트에 들어가도 됨): Firebase 웹 설정(`src/lib/firebase.ts`의 apiKey 등), 네이버 지도 Client ID(`VITE_NAVER_CLIENT_ID`). 비밀 정보로 오해해서 옮기거나 지우거나 고치지 말 것(`firebase.ts`는 수정 금지). 이 값들의 접근 통제는 Firebase 콘솔의 Firestore 보안 규칙과 네이버 콘솔의 서비스 URL 등록으로 함.
+  - 진짜 비밀(절대 코드·Git·`VITE_` 변수에 넣지 말 것): `NAVER_SEARCH_CLIENT_SECRET`, `NAVER_MAPS_API_KEY` 등 `scripts/` 전용 키. 내 컴퓨터의 `.env`에만 두고, Vercel에도 등록하지 말 것.
+- 이름이 `VITE_`로 시작하는 환경변수는 빌드 결과(공개 사이트)에 그대로 들어감. 비밀 값에는 절대 `VITE_`를 붙이지 말 것.
 
 ## 7. 데이터베이스
 
@@ -79,12 +82,12 @@ AI는 작업을 시작할 때 다음을 확인하고 사용자에게 짧게 알�
 
 ## 11. 배포
 
+- 배포는 Vercel이 GitHub `main` 브랜치를 보고 자동으로 함. 별도 배포 명령은 없음. 즉 `main`에 푸시하면 곧바로 사이트에 반영됨.
 - 학생도 직접 배포할 수 있음. 선생님 승인은 필요 없고, 선생님은 배포된 결과를 확인함.
-- 배포는 사용자가 요청할 때만 할 것. 명령어: `npm run deploy`
-- 배포 전에 반드시 확인할 것: ① `git pull`로 최신 상태인지 ② `npm run lint`, `npm run build`가 오류 없이 끝나는지 ③ 배포할 변경 내용이 `main`에 푸시되어 있는지
-- 푸시하지 않은 코드나 오래된 코드로 배포하지 말 것. 사이트가 이전 상태로 덮어써짐.
-- 배포가 끝나면 배포 주소를 열어 정상 동작을 확인하고 사용자에게 알릴 것.
-- 배포 후 문제가 생기면 `git revert`로 되돌린 뒤 다시 배포할 것.
+- 푸시(=배포)는 사용자가 요청할 때만 할 것. 푸시 전에 반드시 확인할 것: ① `git pull`로 최신 상태인지 ② `npm run lint`, `npm run build`가 오류 없이 끝나는지
+- 푸시 후 Vercel 배포가 끝나면 배포 주소를 열어 정상 동작(지도 표시, 식당 목록)을 확인하고 사용자에게 알릴 것. 배포가 막히거나 실패하면 사용자에게 바로 알릴 것.
+- 네이버 지도 키(`VITE_NAVER_CLIENT_ID`)는 Vercel의 Environment Variables에 등록되어 있음. 내 컴퓨터의 `.env`는 로컬 개발용이며 배포 결과에는 영향이 없음.
+- 빌드가 실패하면 Vercel은 기존 사이트를 그대로 유지함. 배포 후 문제가 생기면 `git revert`로 되돌려 푸시할 것.
 
 ## 12. 식당 데이터 추가·수정
 

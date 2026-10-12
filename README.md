@@ -22,7 +22,7 @@
    npm install
    ```
 3. `.env.example`을 복사해 `.env` 파일을 만들고 `VITE_NAVER_CLIENT_ID` 값 입력 (값은 선생님께 문의). 비워두면 네이버 지도 대신 간단 지도가 표시됩니다.
-4. 개발 서버 실행 후, 터미널에 표시된 주소(http://localhost:3000/DD-reusable-map/)를 브라우저로 열기
+4. 개발 서버 실행 후, 터미널에 표시된 주소(http://localhost:3000/)를 브라우저로 열기
    ```bash
    npm run dev
    ```
@@ -171,17 +171,28 @@
 
 1. `npm run lint`로 오류가 없는지 확인합니다.
 2. `npm run dev`로 실행해서 새 식당이 목록에 나오는지, 지도 핀 위치가 맞는지, 눌렀을 때 메뉴·탄소배출량·배민 버튼이 제대로 나오는지 확인합니다.
-3. 커밋·푸시한 뒤 필요하면 배포합니다(아래 "배포" 참고).
+3. 커밋·푸시합니다. 푸시하면 Vercel이 자동으로 배포합니다(아래 "배포" 참고).
 
 ## 배포
 
-GitHub Pages(`gh-pages` 브랜치)로 배포합니다. 협업자로 초대된 학생도 직접 배포할 수 있습니다.
+Vercel이 GitHub `main` 브랜치를 자동으로 배포합니다. 별도 배포 명령은 없고, `main`에 푸시하면 몇 분 안에 사이트에 반영됩니다. 협업자로 초대된 학생도 푸시해서 배포할 수 있습니다.
 
 1. `git pull`로 최신 상태인지 확인
 2. `npm run lint`, `npm run build`가 오류 없이 끝나는지 확인
 3. 변경 내용을 `main`에 푸시
-4. 배포
-   ```bash
-   npm run deploy
-   ```
-5. 배포 주소(https://heesung0128-hub.github.io/DD-reusable-map/)를 열어 확인 (반영까지 몇 분 걸릴 수 있음)
+4. Vercel 배포가 끝나면 배포 주소를 열어 지도와 식당 목록이 정상인지 확인
+
+빌드가 실패하면 Vercel은 기존 사이트를 그대로 둡니다. 배포 후 문제가 생기면 `git revert`로 되돌려 푸시하세요.
+
+### 운영자(선생님) 설정: Vercel 연결
+
+처음 한 번만 합니다.
+
+1. https://vercel.com 에 GitHub 계정으로 가입하고 **Add New → Project**에서 이 저장소를 Import 합니다. 프레임워크(Vite), 빌드 명령(`npm run build`), 출력 폴더(`dist`)는 자동으로 인식됩니다.
+2. Deploy를 누르기 전에 **Environment Variables**에 `VITE_NAVER_CLIENT_ID`를 추가합니다(값은 `.env`와 같고, Production·Preview 모두 체크). 환경변수는 이미 끝난 배포에는 적용되지 않으므로, 나중에 추가했다면 Redeploy 해야 합니다.
+3. 배포된 주소(`https://….vercel.app`)를 네이버 클라우드 콘솔의 Maps Application → Web 서비스 URL에 추가합니다. 등록하지 않으면 지도가 간단 지도로 표시됩니다.
+4. Firebase 웹 키를 Google Cloud 콘솔에서 주소(HTTP 리퍼러)로 제한해 둔 경우에만, 그 주소도 허용 목록에 추가합니다.
+5. 새 주소에서 지도와 인증 갤러리가 정상인지 확인한 뒤, 기존 GitHub Pages(저장소 Settings → Pages)를 끕니다.
+
+- Vercel 무료(Hobby) 플랜은 공식 문서상 커밋 작성자가 Vercel 계정 소유자여야 배포됩니다. 학생이 푸시한 커밋의 배포가 막히면 Vercel 대시보드에서 Redeploy 하거나 팀 플랜을 사용하세요.
+- `VITE_`로 시작하는 환경변수는 사이트 코드에 그대로 들어가 누구나 볼 수 있습니다. 네이버 지도 Client ID와 Firebase 웹 설정은 원래 공개용 값입니다. 반대로 `NAVER_SEARCH_CLIENT_SECRET`, `NAVER_MAPS_API_KEY` 같은 스크립트용 비밀 키는 Vercel에도 등록하지 마세요. 자세한 구분은 [AGENTS.md](AGENTS.md) 6번을 보세요.
