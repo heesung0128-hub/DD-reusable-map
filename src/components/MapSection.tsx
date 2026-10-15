@@ -1,13 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, MapPin, Utensils, ChevronRight, X } from 'lucide-react';
+import { Search, MapPin, Utensils, ChevronRight, X, Heart } from 'lucide-react';
 import { Restaurant, FoodCategory } from '../types';
 import { RESTAURANTS_DATA, DONGDEOK_SCHOOL_COORDS } from '../data/mockData';
 import { FOOD_CATEGORIES } from '../data/categories';
+import { sortRestaurants, SortMode } from '../data/sortRestaurants';
 import { RestaurantDetail } from './RestaurantDetail';
 
 interface MapSectionProps {
   onOpenCertModal?: () => void;
 }
+
+// 찜한 식당은 이 기기(브라우저)에 저장해서 새로고침해도 남게 함
+const LIKED_STORAGE_KEY = 'dongdeok_eco_liked_restaurants';
+
+function loadLikedRestaurants(): string[] {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(LIKED_STORAGE_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed.filter((id) => typeof id === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+const SORT_OPTIONS: { mode: SortMode; label: string }[] = [
+  { mode: 'distance', label: '가까운 순' },
+  { mode: 'popular', label: '인기순' },
+];
 
 // Baked in at build time so every visitor gets the real Naver map automatically.
 const NAVER_CLIENT_ID = import.meta.env.VITE_NAVER_CLIENT_ID as string | undefined;
@@ -37,7 +55,11 @@ export const MapSection: React.FC<MapSectionProps> = () => {
   const [selectedCategory, setSelectedCategory] = useState<FoodCategory>('전체');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
-  const [likedRestaurants, setLikedRestaurants] = useState<string[]>([]);
+  const [likedRestaurants, setLikedRestaurants] = useState<string[]>(loadLikedRestaurants);
+  const [showLikedOnly, setShowLikedOnly] = useState(false);
+  const [sortMode, setSortMode] = useState<SortMode>('distance');
+  const [certCounts, setCertCounts] = useState<Record<string, number> | null>(null);
+  const [countsStatus, setCountsStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [naverMapLoaded, setNaverMapLoaded] = useState(false);
   const [mapMode, setMapMode] = useState<'interactive-vector' | 'naver-sdk'>('interactive-vector');
 
@@ -111,10 +133,47 @@ export const MapSection: React.FC<MapSectionProps> = () => {
 
   const toggleLike = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setLikedRestaurants(prev => 
+    setLikedRestaurants(prev =>
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
   };
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LIKED_STORAGE_KEY, JSON.stringify(likedRestaurants));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [likedRestaurants]);
+
+  // 인기순을 고르면 식당별 인증 수를 불러옴 (처음 화면이 무거워지지 않게 이때 처음 불러옴)
+  useEffect(() => {
+    if (sortMode !== 'popular') return;
+    let cancelled = false;
+    setCountsStatus('loading');
+    import('../services/certCounts')
+      .then((m) => m.fetchCertCounts())
+      .then((counts) => {
+        if (cancelled) return;
+        setCertCounts(counts);
+        setCountsStatus('done');
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!cancelled) setCountsStatus('error');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [sortMode]);
+
+  // 목록에 보이는 식당: 찜한 식당만 보기 → 정렬 순서 (지도 핀은 카테고리·검색 결과를 그대로 보여줌)
+  const likedCount = RESTAURANTS_DATA.filter((r) => likedRestaurants.includes(r.id)).length;
+  const displayedRestaurants = sortRestaurants(
+    showLikedOnly ? filteredRestaurants.filter((r) => likedRestaurants.includes(r.id)) : filteredRestaurants,
+    sortMode,
+    countsStatus === 'done' ? certCounts : null,
+  );
 
   // Naver Maps Script loader
   const loadNaverMaps = (clientId: string) => {
@@ -418,9 +477,60 @@ export const MapSection: React.FC<MapSectionProps> = () => {
             </h3>
             <p className="lg:hidden text-[11px] text-slate-500 mb-2">식당을 누르면 아래로 정보가 열려요.</p>
 
+            {/* 목록 보기 옵션: 정렬 + 찜한 식당만 보기 */}
+            <div className="flex flex-wrap items-center gap-1.5 mb-2">
+              <span className="text-[11px] font-bold text-slate-500 mr-0.5">정렬</span>
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.mode}
+                  type="button"
+                  onClick={() => setSortMode(opt.mode)}
+                  aria-pressed={sortMode === opt.mode}
+                  className={`min-h-11 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                    sortMode === opt.mode
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-white text-slate-700 border border-emerald-100 hover:bg-emerald-50'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => setShowLikedOnly((v) => !v)}
+                aria-pressed={showLikedOnly}
+                className={`min-h-11 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1 ml-auto ${
+                  showLikedOnly
+                    ? 'bg-rose-500 text-white shadow-xs'
+                    : 'bg-white text-slate-700 border border-rose-100 hover:bg-rose-50'
+                }`}
+              >
+                <Heart className={`w-3.5 h-3.5 ${showLikedOnly ? 'fill-white' : 'text-rose-500'}`} />
+                <span>찜한 식당 {likedCount}</span>
+              </button>
+            </div>
+
+            {sortMode === 'popular' && (
+              <p className="text-[11px] text-slate-500 mb-2">
+                {countsStatus === 'loading' && '인증 수를 불러오는 중이에요…'}
+                {countsStatus === 'error' && '인증 수를 불러오지 못해 가까운 순으로 보여드려요.'}
+                {countsStatus === 'done' && '학생 인증이 많은 식당부터 보여드려요. (같으면 가까운 순)'}
+              </p>
+            )}
+
+            {displayedRestaurants.length === 0 && (
+              <div className="bg-white rounded-2xl p-6 text-center text-xs text-slate-500 border border-emerald-100">
+                {showLikedOnly && likedCount === 0
+                  ? '아직 찜한 식당이 없어요. 식당을 열어 ♡를 눌러 보세요.'
+                  : '조건에 맞는 식당이 없어요. 검색어나 카테고리를 바꿔 보세요.'}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 items-start">
-              {filteredRestaurants.map((rest) => {
+              {displayedRestaurants.map((rest) => {
                 const isOpen = selectedRestaurant?.id === rest.id;
+                const isLiked = likedRestaurants.includes(rest.id);
                 return (
                   <div
                     key={rest.id}
@@ -446,8 +556,16 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                            rest.category.includes('양식') ? '🍝' : '🍱'}
                         </div>
                         <div className="min-w-0">
-                          <div className="font-extrabold text-xs text-slate-900">{rest.name}</div>
-                          <div className="text-[10px] text-slate-500">학교에서 {rest.distanceMeters}m · 배달 약 {rest.deliveryMinutes}분</div>
+                          <div className="font-extrabold text-xs text-slate-900 flex items-center gap-1">
+                            <span>{rest.name}</span>
+                            {isLiked && <Heart className="w-3 h-3 fill-rose-500 text-rose-500 shrink-0" aria-label="찜한 식당" />}
+                          </div>
+                          <div className="text-[10px] text-slate-500">
+                            학교에서 {rest.distanceMeters}m · 배달 약 {rest.deliveryMinutes}분
+                            {sortMode === 'popular' && countsStatus === 'done' && certCounts && (
+                              <span className="font-bold text-emerald-700"> · 인증 {certCounts[rest.id] ?? 0}건</span>
+                            )}
+                          </div>
                         </div>
                       </div>
 

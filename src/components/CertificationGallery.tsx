@@ -6,7 +6,7 @@ import {
 import confetti from 'canvas-confetti';
 import {
   collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc,
-  increment, serverTimestamp, orderBy, query,
+  increment, serverTimestamp, orderBy, query, limit,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { CertificationPost } from '../types';
@@ -18,6 +18,9 @@ import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 // storing as base64 so a handful of posts don't blow past localStorage quota.
 const MAX_PHOTO_DIMENSION = 1280;
 const PHOTO_JPEG_QUALITY = 0.8;
+
+// 인증 글은 이 개수씩 나눠서 불러옴 (사진이 글에 들어 있어 한꺼번에 불러오면 느려짐)
+const POSTS_PER_PAGE = 12;
 
 function compressImageFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -69,6 +72,8 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
   const [posts, setPosts] = useState<CertificationPost[]>([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [postsError, setPostsError] = useState(false);
+  const [visibleLimit, setVisibleLimit] = useState(POSTS_PER_PAGE);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const [likedPostIds, setLikedPostIds] = useState<string[]>(() => {
     const saved = localStorage.getItem('dongdeok_eco_liked_ids');
@@ -111,8 +116,9 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
   const [fileInputKey, setFileInputKey] = useState(0);
 
   // Subscribe to the shared certification board in Firestore
+  // 더 보기가 있는지 알기 위해 보여줄 개수보다 1개 더 요청함
   useEffect(() => {
-    const q = query(collection(db, 'certifications'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'certifications'), orderBy('createdAt', 'desc'), limit(visibleLimit + 1));
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -132,16 +138,18 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
           } as CertificationPost;
         }));
         setPostsLoading(false);
+        setLoadingMore(false);
         setPostsError(false);
       },
       (err) => {
         console.error(err);
         setPostsLoading(false);
+        setLoadingMore(false);
         setPostsError(true);
       }
     );
     return () => unsubscribe();
-  }, []);
+  }, [visibleLimit]);
 
   useEffect(() => {
     try {
@@ -268,8 +276,17 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
     }
   };
 
+  // 1개 더 받아 온 글이 있으면 아직 더 볼 글이 있다는 뜻
+  const hasMore = posts.length > visibleLimit;
+  const shownPosts = posts.slice(0, visibleLimit);
+
+  const handleLoadMore = () => {
+    setLoadingMore(true);
+    setVisibleLimit((n) => n + POSTS_PER_PAGE);
+  };
+
   // 첫 화면과 같은 카테고리 이름으로 거름. 지도에 없는 식당의 글은 '전체'에서만 보임
-  const filteredPosts = posts.filter(post => {
+  const filteredPosts = shownPosts.filter(post => {
     if (filterCategory === '전체') return true;
     return getRestaurantCategory(post.restaurantName) === filterCategory;
   });
@@ -340,7 +357,7 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
         </div>
 
         <div className="text-xs font-bold text-emerald-800 shrink-0">
-          총 <strong className="text-emerald-600 font-black">{filteredPosts.length}</strong>개의 인증
+          {hasMore ? '최근 ' : '총 '}<strong className="text-emerald-600 font-black">{filteredPosts.length}</strong>개의 인증
         </div>
       </div>
 
@@ -424,7 +441,24 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
 
       {filteredPosts.length === 0 && (
         <div className="text-center py-12 bg-white rounded-3xl border border-emerald-200">
-          <p className="text-sm text-slate-500 font-medium">선택한 매장의 인증 게시물이 아직 없습니다.</p>
+          <p className="text-sm text-slate-500 font-medium">
+            {hasMore
+              ? '불러온 글 중에는 이 카테고리의 인증이 없어요. 아래 "더 보기"로 이전 글을 찾아보세요.'
+              : '선택한 카테고리의 인증 게시물이 아직 없습니다.'}
+          </p>
+        </div>
+      )}
+
+      {hasMore && (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="min-h-11 px-6 py-2.5 rounded-2xl bg-white border-2 border-emerald-200 text-emerald-800 text-xs sm:text-sm font-black hover:bg-emerald-50 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loadingMore ? '불러오는 중...' : `인증 더 보기 (${POSTS_PER_PAGE}개씩)`}
+          </button>
         </div>
       )}
       </>
