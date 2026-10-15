@@ -1,4 +1,4 @@
-import { FoodCategory } from '../types';
+import { FoodCategory, Restaurant } from '../types';
 import { RESTAURANTS_DATA } from './mockData';
 
 // 첫 화면과 인증 갤러리가 같은 카테고리 이름을 쓰도록 한곳에 둠
@@ -12,7 +12,9 @@ export const FOOD_CATEGORIES: FoodCategory[] = [
   '카페/디저트',
 ];
 
-// 식당 이름으로 카테고리를 찾음. 목록에 없는 식당이면 undefined
-export function getRestaurantCategory(restaurantName: string): FoodCategory | undefined {
-  return RESTAURANTS_DATA.find((r) => r.name === restaurantName)?.category;
+// 인증 글이 가리키는 식당을 찾음. 식당 ID가 있으면 ID로 찾고(이름이 바뀌어도 연결됨),
+// ID가 없는 예전 글은 이름으로 찾음. 지도에 없는 식당이면 undefined
+export function findRestaurant(restaurantId: string | undefined, restaurantName: string): Restaurant | undefined {
+  if (restaurantId) return RESTAURANTS_DATA.find((r) => r.id === restaurantId);
+  return RESTAURANTS_DATA.find((r) => r.name === restaurantName);
 }

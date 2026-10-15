@@ -35,6 +35,8 @@ export interface CertificationPost {
   studentName: string;
   gradeClass: string;
   restaurantName: string;
+  // 식당 이름이 바뀌어도 연결되도록 함. 이 칸이 생기기 전에 올린 글에는 없음
+  restaurantId?: string;
   menuName: string;
   photoUrl: string;
   comment: string;

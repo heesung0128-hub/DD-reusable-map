@@ -11,7 +11,7 @@ import {
 import { db } from '../lib/firebase';
 import { CertificationPost } from '../types';
 import { RESTAURANTS_DATA } from '../data/mockData';
-import { FOOD_CATEGORIES, getRestaurantCategory } from '../data/categories';
+import { FOOD_CATEGORIES, findRestaurant } from '../data/categories';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 // Phone camera photos are often several MB; downscale + re-encode before
@@ -107,7 +107,7 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
   // Form State
   const [authorName, setAuthorName] = useState('');
   const [gradeClass, setGradeClass] = useState('동덕여고 2학년 3반');
-  const [selectedRest, setSelectedRest] = useState('');
+  const [selectedRestId, setSelectedRestId] = useState('');
   const [menuName, setMenuName] = useState('');
   const [comment, setComment] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
@@ -129,6 +129,7 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
             studentName: data.studentName,
             gradeClass: data.gradeClass,
             restaurantName: data.restaurantName,
+            restaurantId: data.restaurantId,
             menuName: data.menuName,
             photoUrl: data.photoUrl,
             comment: data.comment,
@@ -225,7 +226,8 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
       alert('이름과 실천 소감을 입력해주세요!');
       return;
     }
-    if (!selectedRest) {
+    const restaurant = RESTAURANTS_DATA.find((r) => r.id === selectedRestId);
+    if (!restaurant) {
       alert('이용한 매장을 선택해주세요!');
       return;
     }
@@ -241,7 +243,9 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
     const newPostData = {
       studentName: authorName.trim(),
       gradeClass: gradeClass.trim() || '동덕여자고등학교',
-      restaurantName: selectedRest,
+      // 이름은 화면 표시용, ID는 식당을 가리키는 변하지 않는 번호 (카테고리·인증 수 계산에 씀)
+      restaurantName: restaurant.name,
+      restaurantId: restaurant.id,
       menuName: menuName.trim() || '다회용기 메뉴',
       photoUrl: photoUrl,
       comment: comment.trim(),
@@ -266,7 +270,7 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
 
       setAuthorName('');
       setComment('');
-      setSelectedRest('');
+      setSelectedRestId('');
       setMenuName('');
       setPhotoUrl('');
       setFileInputKey((k) => k + 1);
@@ -288,7 +292,7 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
   // 첫 화면과 같은 카테고리 이름으로 거름. 지도에 없는 식당의 글은 '전체'에서만 보임
   const filteredPosts = shownPosts.filter(post => {
     if (filterCategory === '전체') return true;
-    return getRestaurantCategory(post.restaurantName) === filterCategory;
+    return findRestaurant(post.restaurantId, post.restaurantName)?.category === filterCategory;
   });
 
   return (
@@ -402,7 +406,7 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
 
                   <div>
                     <div className="text-xs font-black text-emerald-950 truncate">
-                      🍴 {post.restaurantName}
+                      🍴 {findRestaurant(post.restaurantId, post.restaurantName)?.name ?? post.restaurantName}
                     </div>
                     <div className="text-[11px] text-slate-500 font-medium truncate">
                       {post.menuName}
@@ -526,15 +530,15 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
                   <select
                     id="cert-restaurant"
                     required
-                    value={selectedRest}
-                    onChange={(e) => setSelectedRest(e.target.value)}
+                    value={selectedRestId}
+                    onChange={(e) => setSelectedRestId(e.target.value)}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
                   >
                     <option value="">매장을 선택하세요</option>
                     {FOOD_CATEGORIES.filter((c) => c !== '전체').map((cat) => (
                       <optgroup key={cat} label={cat}>
                         {RESTAURANTS_DATA.filter((r) => r.category === cat).map((r) => (
-                          <option key={r.id} value={r.name}>{r.name}</option>
+                          <option key={r.id} value={r.id}>{r.name}</option>
                         ))}
                       </optgroup>
                     ))}
