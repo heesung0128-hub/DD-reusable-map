@@ -3,6 +3,7 @@ import {
   Sparkles, CheckCircle, Heart, CornerDownRight, Truck, Leaf, Star, ExternalLink,
 } from 'lucide-react';
 import { Restaurant } from '../types';
+import { formatDistance } from '../data/formatDistance';
 
 interface RestaurantDetailProps {
   restaurant: Restaurant;
@@ -54,7 +55,7 @@ export const RestaurantDetail: React.FC<RestaurantDetailProps> = ({ restaurant, 
               </span>
               <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
                 <Truck className="w-3 h-3 text-emerald-600" />
-                학교에서 {restaurant.distanceMeters}m · 배달 약 {restaurant.deliveryMinutes}분
+                학교에서 {formatDistance(restaurant.distanceMeters)} · 배달 약 {restaurant.deliveryMinutes}분
               </span>
             </div>
             <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight">

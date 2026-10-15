@@ -79,7 +79,7 @@ export const OrderReturnGuide: React.FC<OrderReturnGuideProps> = ({ onGoToMap, o
           <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
           <span>동덕여고 다회용기 이용 & 반납 가이드</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight text-balance">
           용기 준비 없이 주문하고, 교내에서 간편 반납!
         </h2>
         <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed lg:whitespace-nowrap">
@@ -102,12 +102,12 @@ export const OrderReturnGuide: React.FC<OrderReturnGuideProps> = ({ onGoToMap, o
 
       {/* 1. 4-Step Reusable System Flow */}
       <div className="bg-white rounded-3xl border-2 border-emerald-200 p-5 sm:p-7 shadow-sm">
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-            <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center justify-center">1</span>
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 mb-5">
+          <h3 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2 min-w-0 text-balance">
+            <span className="w-6 h-6 shrink-0 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center justify-center">1</span>
             <span>다회용기 주문부터 수령까지 4단계</span>
           </h3>
-          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 whitespace-nowrap">
             보증금 & 대여료 0원
           </span>
         </div>
@@ -156,12 +156,12 @@ export const OrderReturnGuide: React.FC<OrderReturnGuideProps> = ({ onGoToMap, o
             <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-700 text-emerald-200 border border-emerald-500 uppercase">
               Dongdeok Return Spots
             </span>
-            <h3 className="text-base sm:text-lg font-black text-white mt-1 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-emerald-300" />
+            <h3 className="text-base sm:text-lg font-black text-white mt-1 flex items-center gap-2 text-balance">
+              <MapPin className="w-5 h-5 shrink-0 text-emerald-300" />
               <span>동덕여자고등학교 교내 다회용기 전용 반납함 위치</span>
             </h3>
           </div>
-          <span className="text-xs font-bold text-emerald-200 bg-emerald-900/60 px-3 py-1.5 rounded-xl border border-emerald-700">
+          <span className="text-xs font-bold text-emerald-200 bg-emerald-900/60 px-3 py-1.5 rounded-xl border border-emerald-700 whitespace-nowrap self-start sm:self-auto">
             매일 전문 업체 정기 수거
           </span>
         </div>
@@ -190,8 +190,8 @@ export const OrderReturnGuide: React.FC<OrderReturnGuideProps> = ({ onGoToMap, o
 
       {/* 3. Return Etiquette 3 Principles */}
       <div className="bg-white rounded-3xl border-2 border-emerald-200 p-5 sm:p-7 shadow-sm">
-        <h3 className="text-base sm:text-lg font-black text-slate-900 mb-2 flex items-center gap-2">
-          <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center justify-center">2</span>
+        <h3 className="text-base sm:text-lg font-black text-slate-900 mb-2 flex items-center gap-2 text-balance">
+          <span className="w-6 h-6 shrink-0 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center justify-center">2</span>
           <span>동덕인을 위한 초간단 반납 에티켓 3원칙</span>
         </h3>
         <p className="text-xs text-slate-600 mb-5">

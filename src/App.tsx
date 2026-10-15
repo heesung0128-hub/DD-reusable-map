@@ -17,7 +17,8 @@ export default function App() {
   const [isCertModalOpen, setIsCertModalOpen] = useState<boolean>(false);
 
   return (
-    <div className="min-h-screen bg-[#F0FAF5] flex flex-col selection:bg-emerald-200 selection:text-emerald-900 font-sans">
+    // break-keep: 한글이 단어 중간에서 끊기지 않고 띄어쓰기에서만 줄바꿈됨. 너무 긴 단어만 예외로 끊음
+    <div className="min-h-screen bg-[#F0FAF5] flex flex-col selection:bg-emerald-200 selection:text-emerald-900 font-sans break-keep [overflow-wrap:break-word]">
       
       {/* 1. Header & Navigation Tabs (Multi-page Switching) */}
       <Navbar

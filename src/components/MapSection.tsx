@@ -4,6 +4,7 @@ import { Restaurant, FoodCategory } from '../types';
 import { RESTAURANTS_DATA, DONGDEOK_SCHOOL_COORDS } from '../data/mockData';
 import { FOOD_CATEGORIES } from '../data/categories';
 import { sortRestaurants, SortMode } from '../data/sortRestaurants';
+import { formatDistance } from '../data/formatDistance';
 import { RestaurantDetail } from './RestaurantDetail';
 
 interface MapSectionProps {
@@ -12,10 +13,12 @@ interface MapSectionProps {
 
 // 찜한 식당은 이 기기(브라우저)에 저장해서 새로고침해도 남게 함
 const LIKED_STORAGE_KEY = 'dongdeok_eco_liked_restaurants';
+// 찜 중에서 '전체 학생의 찜 수'에 이미 더해 둔 식당. 찜을 해제할 때 한 번만 빼기 위해 기억해 둠
+const COUNTED_STORAGE_KEY = 'dongdeok_eco_liked_counted';
 
-function loadLikedRestaurants(): string[] {
+function loadIdList(key: string): string[] {
   try {
-    const parsed = JSON.parse(localStorage.getItem(LIKED_STORAGE_KEY) || '[]');
+    const parsed = JSON.parse(localStorage.getItem(key) || '[]');
     return Array.isArray(parsed) ? parsed.filter((id) => typeof id === 'string') : [];
   } catch {
     return [];
@@ -55,11 +58,12 @@ export const MapSection: React.FC<MapSectionProps> = () => {
   const [selectedCategory, setSelectedCategory] = useState<FoodCategory>('전체');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
-  const [likedRestaurants, setLikedRestaurants] = useState<string[]>(loadLikedRestaurants);
+  const [likedRestaurants, setLikedRestaurants] = useState<string[]>(() => loadIdList(LIKED_STORAGE_KEY));
+  const [countedLikes, setCountedLikes] = useState<string[]>(() => loadIdList(COUNTED_STORAGE_KEY));
   const [showLikedOnly, setShowLikedOnly] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>('distance');
-  const [certCounts, setCertCounts] = useState<Record<string, number> | null>(null);
-  const [countsStatus, setCountsStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [popularityScores, setPopularityScores] = useState<Record<string, number> | null>(null);
+  const [rankStatus, setRankStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [naverMapLoaded, setNaverMapLoaded] = useState(false);
   const [mapMode, setMapMode] = useState<'interactive-vector' | 'naver-sdk'>('interactive-vector');
 
@@ -131,36 +135,53 @@ export const MapSection: React.FC<MapSectionProps> = () => {
     return matchCategory && matchSearch;
   });
 
+  // 찜하면 전체 학생의 찜 수에 +1, 찜을 해제하면 -1 (이 기능이 생기기 전에 누른 찜은 해제해도 빼지 않음)
   const toggleLike = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setLikedRestaurants(prev =>
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-    );
+    const willLike = !likedRestaurants.includes(id);
+    setLikedRestaurants(prev => (willLike ? [...prev, id] : prev.filter(item => item !== id)));
+
+    if (willLike) {
+      setCountedLikes(prev => (prev.includes(id) ? prev : [...prev, id]));
+      import('../services/popularity')
+        .then((m) => m.changeRestaurantLikeCount(id, 1))
+        .catch((err) => {
+          // 전송에 실패하면 더해지지 않았으니 '더해 둠' 표시도 지움
+          console.error(err);
+          setCountedLikes(prev => prev.filter(item => item !== id));
+        });
+    } else if (countedLikes.includes(id)) {
+      setCountedLikes(prev => prev.filter(item => item !== id));
+      import('../services/popularity')
+        .then((m) => m.changeRestaurantLikeCount(id, -1))
+        .catch((err) => console.error(err));
+    }
   };
 
   useEffect(() => {
     try {
       localStorage.setItem(LIKED_STORAGE_KEY, JSON.stringify(likedRestaurants));
+      localStorage.setItem(COUNTED_STORAGE_KEY, JSON.stringify(countedLikes));
     } catch (e) {
       console.error(e);
     }
-  }, [likedRestaurants]);
+  }, [likedRestaurants, countedLikes]);
 
-  // 인기순을 고르면 식당별 인증 수를 불러옴 (처음 화면이 무거워지지 않게 이때 처음 불러옴)
+  // 인기순을 고르면 식당별 인기 점수(인증 수 + 찜 수)를 불러옴 (처음 화면이 무거워지지 않게 이때 처음 불러옴)
   useEffect(() => {
     if (sortMode !== 'popular') return;
     let cancelled = false;
-    setCountsStatus('loading');
-    import('../services/certCounts')
-      .then((m) => m.fetchCertCounts())
-      .then((counts) => {
+    setRankStatus('loading');
+    import('../services/popularity')
+      .then((m) => m.fetchPopularityScores())
+      .then((scores) => {
         if (cancelled) return;
-        setCertCounts(counts);
-        setCountsStatus('done');
+        setPopularityScores(scores);
+        setRankStatus('done');
       })
       .catch((err) => {
         console.error(err);
-        if (!cancelled) setCountsStatus('error');
+        if (!cancelled) setRankStatus('error');
       });
     return () => {
       cancelled = true;
@@ -172,7 +193,7 @@ export const MapSection: React.FC<MapSectionProps> = () => {
   const displayedRestaurants = sortRestaurants(
     showLikedOnly ? filteredRestaurants.filter((r) => likedRestaurants.includes(r.id)) : filteredRestaurants,
     sortMode,
-    countsStatus === 'done' ? certCounts : null,
+    rankStatus === 'done' ? popularityScores : null,
   );
 
   // Naver Maps Script loader
@@ -293,7 +314,7 @@ export const MapSection: React.FC<MapSectionProps> = () => {
               <span>동덕여고 근처 다회용기 맛집</span>
             </div>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight text-balance">
             동덕여고 근처 다회용기 맛집 맵
           </h2>
           <p className="text-xs text-slate-600 mt-0.5">
@@ -513,9 +534,9 @@ export const MapSection: React.FC<MapSectionProps> = () => {
 
             {sortMode === 'popular' && (
               <p className="text-[11px] text-slate-500 mb-2">
-                {countsStatus === 'loading' && '인증 수를 불러오는 중이에요…'}
-                {countsStatus === 'error' && '인증 수를 불러오지 못해 가까운 순으로 보여드려요.'}
-                {countsStatus === 'done' && '학생 인증이 많은 식당부터 보여드려요. (같으면 가까운 순)'}
+                {rankStatus === 'loading' && '인기 순위를 불러오는 중이에요…'}
+                {rankStatus === 'error' && '순위를 불러오지 못해 가까운 순으로 보여드려요.'}
+                {rankStatus === 'done' && '찜과 인증이 많은 식당부터 보여드려요. (같으면 가까운 순)'}
               </p>
             )}
 
@@ -561,10 +582,7 @@ export const MapSection: React.FC<MapSectionProps> = () => {
                             {isLiked && <Heart className="w-3 h-3 fill-rose-500 text-rose-500 shrink-0" aria-label="찜한 식당" />}
                           </div>
                           <div className="text-[10px] text-slate-500">
-                            학교에서 {rest.distanceMeters}m · 배달 약 {rest.deliveryMinutes}분
-                            {sortMode === 'popular' && countsStatus === 'done' && certCounts && (
-                              <span className="font-bold text-emerald-700"> · 인증 {certCounts[rest.id] ?? 0}건</span>
-                            )}
+                            학교에서 {formatDistance(rest.distanceMeters)} · 배달 약 {rest.deliveryMinutes}분
                           </div>
                         </div>
                       </div>

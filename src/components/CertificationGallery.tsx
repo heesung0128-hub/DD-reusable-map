@@ -305,7 +305,7 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
             <Camera className="w-3.5 h-3.5 text-emerald-600" />
             <span>동덕인 실시간 에코 인증 갤러리</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight text-balance">
             동덕여고 '용기내' 인증 피드
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 mt-1">
