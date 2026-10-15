@@ -492,7 +492,7 @@ export const RESTAURANTS_DATA: Restaurant[] = [
     name: '서병장부대찌개 교대점',
     category: '한식/도시락',
     distanceMeters: 4800,
-    deliveryMinutes: 11,
+    deliveryMinutes: 45,
     lat: 37.4927099,
     lng: 127.0159225,
     address: '서울 서초구 서초중앙로20길 34-6',
