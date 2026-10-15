@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  Search, MapPin, Sparkles, Utensils,
-  CheckCircle, ChevronRight, X, Heart, CornerDownRight, Truck, Leaf, Star, ExternalLink
-} from 'lucide-react';
+import { Search, MapPin, Utensils, ChevronRight, X } from 'lucide-react';
 import { Restaurant, FoodCategory } from '../types';
 import { RESTAURANTS_DATA, DONGDEOK_SCHOOL_COORDS } from '../data/mockData';
+import { FOOD_CATEGORIES } from '../data/categories';
+import { RestaurantDetail } from './RestaurantDetail';
 
 interface MapSectionProps {
   onOpenCertModal?: () => void;
@@ -46,19 +45,39 @@ export const MapSection: React.FC<MapSectionProps> = () => {
   const naverMapInstance = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const detailRef = useRef<HTMLDivElement>(null);
+  const listItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const naverAuthFailedRef = useRef(false);
 
-  // Selecting a restaurant (from the map or the list) reveals its detail/menu card —
-  // scroll it into view since on mobile it now sits below the full restaurant list.
-  const handleSelectRestaurant = (rest: Restaurant) => {
-    setSelectedRestaurant(rest);
+  // 넓은 화면(lg 이상)은 오른쪽 패널, 좁은 화면은 목록 안에서 아래로 열림
+  const isDesktop = () => window.matchMedia('(min-width: 1024px)').matches;
+
+  // 선택한 식당 정보가 보이는 위치로 스크롤
+  const scrollToSelected = (id: string) => {
     setTimeout(() => {
-      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (isDesktop()) {
+        detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        listItemRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }, 0);
   };
 
-  // Categories list
-  const categories: FoodCategory[] = ['전체', '분식/떡볶이', '마라탕/중식', '포케/샐러드', '한식/도시락', '양식/버거', '카페/디저트'];
+  // 지도 핀을 눌렀을 때: 그 식당을 열고 정보가 있는 곳으로 이동
+  const handleSelectRestaurant = (rest: Restaurant) => {
+    setSelectedRestaurant(rest);
+    scrollToSelected(rest.id);
+  };
+
+  // 목록에서 눌렀을 때: 좁은 화면에서는 열려 있는 식당을 다시 누르면 닫힘
+  const handleListItemClick = (rest: Restaurant) => {
+    if (!isDesktop() && selectedRestaurant?.id === rest.id) {
+      setSelectedRestaurant(null);
+      return;
+    }
+    handleSelectRestaurant(rest);
+  };
+
+  const categories = FOOD_CATEGORIES;
 
   // Horizontal scroll affordance for the category pill row (content overflows on mobile)
   const categoryScrollRef = useRef<HTMLDivElement>(null);
@@ -234,7 +253,7 @@ export const MapSection: React.FC<MapSectionProps> = () => {
               placeholder="매장명, 메뉴 (마라탕, 떡볶이, 포케 등) 검색..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-8 py-2.5 bg-white border-2 border-emerald-200 rounded-xl text-xs sm:text-sm font-medium placeholder:text-slate-400 focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 shadow-xs"
+              className="w-full pl-9 pr-8 py-2.5 bg-white border-2 border-emerald-200 rounded-xl text-base sm:text-sm font-medium placeholder:text-slate-400 focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 shadow-xs"
             />
             {searchQuery && (
               <button
@@ -375,172 +394,15 @@ export const MapSection: React.FC<MapSectionProps> = () => {
             </div>
           </div>
 
-          {/* Right Column: Selected Restaurant Card & Details (5 cols) */}
-          <div ref={detailRef} className="order-3 lg:order-2 lg:col-span-5 flex flex-col space-y-3">
+          {/* Right Column: 선택한 식당 정보 패널 (넓은 화면에서만 보임. 좁은 화면에서는 목록 안에서 아래로 열림) */}
+          <div ref={detailRef} className="hidden lg:flex lg:order-2 lg:col-span-5 flex-col space-y-3">
             {selectedRestaurant ? (
-              <div className="bg-white rounded-2xl sm:rounded-3xl border-2 border-emerald-200 shadow-sm p-4 sm:p-5 flex flex-col justify-between flex-1">
-                
-                {/* Store Header Info */}
-                <div>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-black">
-                          {selectedRestaurant.category}
-                        </span>
-                        <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
-                          <Truck className="w-3 h-3 text-emerald-600" />
-                          학교에서 {selectedRestaurant.distanceMeters}m · 배달 약 {selectedRestaurant.deliveryMinutes}분
-                        </span>
-                      </div>
-                      <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
-                        {selectedRestaurant.name}
-                      </h3>
-                    </div>
-
-                    <button
-                      onClick={(e) => toggleLike(selectedRestaurant.id, e)}
-                      className={`min-w-11 min-h-11 flex items-center justify-center rounded-full border transition-all ${
-                        likedRestaurants.includes(selectedRestaurant.id)
-                          ? 'bg-rose-50 border-rose-200 text-rose-500'
-                          : 'bg-slate-50 border-slate-200 text-slate-400 hover:text-rose-500'
-                      }`}
-                      aria-label="찜하기"
-                    >
-                      <Heart className={`w-4 h-4 ${likedRestaurants.includes(selectedRestaurant.id) ? 'fill-rose-500' : ''}`} />
-                    </button>
-                  </div>
-
-                  {/* Essential Reusable Delivery & Return Box */}
-                  <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-200 space-y-2 mb-3">
-                    <div className="text-xs font-black text-emerald-950 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>다회용기 제공 & 반납 시스템 안내</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-1.5 text-[11px]">
-                      <div className="flex items-start gap-1.5 text-emerald-900">
-                        <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong>주문 방법:</strong> {selectedRestaurant.containerSupport.system}
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-1.5 text-emerald-900">
-                        <CornerDownRight className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong>반납 장소:</strong> {selectedRestaurant.containerSupport.returnSpot}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Store Address & Baemin Order Button */}
-                  <div className="flex items-center justify-between gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200 text-[11px] mb-3">
-                    <span className="text-slate-600 truncate">
-                      {selectedRestaurant.address}
-                      {selectedRestaurant.phone && ` · ${selectedRestaurant.phone}`}
-                    </span>
-                    {selectedRestaurant.baeminUrl ? (
-                      <a
-                        href={selectedRestaurant.baeminUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold shrink-0 hover:bg-emerald-700 flex items-center gap-1 active:scale-95 transition-all text-[11px]"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        <span>배민 주문</span>
-                      </a>
-                    ) : (
-                      <span className="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-500 font-bold shrink-0 text-[11px]">
-                        배민 링크 준비 중
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Recommended Menu Highlights */}
-                  {selectedRestaurant.menus.some(m => m.recommendationTag) && (
-                    <div className="mb-3">
-                      <h4 className="text-xs font-black text-slate-800 mb-1.5 flex items-center gap-1">
-                        <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>추천 메뉴</span>
-                      </h4>
-                      <div className="space-y-1.5">
-                        {selectedRestaurant.menus
-                          .filter(m => m.recommendationTag)
-                          .map((menu) => (
-                            <div
-                              key={menu.id}
-                              className={`p-2 rounded-xl border flex items-center justify-between gap-2 text-xs ${
-                                menu.recommendationTag === '저탄소'
-                                  ? 'bg-emerald-50 border-emerald-200'
-                                  : 'bg-amber-50 border-amber-200'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2 min-w-0">
-                                <div className="min-w-0">
-                                  <div className="font-bold text-slate-900 text-xs leading-tight truncate">
-                                    {menu.name}
-                                  </div>
-                                  <div className="text-[11px] font-semibold text-emerald-700">
-                                    {menu.price.toLocaleString()}원
-                                    {typeof menu.carbonKg === 'number' && (
-                                      <span className="text-slate-500 font-medium"> · 탄소 {menu.carbonKg}kg</span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              <span
-                                className={`text-[10px] px-2 py-0.5 rounded-full font-bold shrink-0 flex items-center gap-1 ${
-                                  menu.recommendationTag === '저탄소'
-                                    ? 'bg-emerald-600 text-white'
-                                    : 'bg-amber-500 text-white'
-                                }`}
-                              >
-                                {menu.recommendationTag === '저탄소' ? (
-                                  <><Leaf className="w-3 h-3" />저탄소</>
-                                ) : (
-                                  <><Star className="w-3 h-3" />대표메뉴</>
-                                )}
-                              </span>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Menu Items List */}
-                  <div>
-                    <h4 className="text-xs font-black text-slate-800 mb-1.5">
-                      대표 메뉴 (다회용기 주문 가능)
-                    </h4>
-                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                      {selectedRestaurant.menus.map((menu) => (
-                        <div
-                          key={menu.id}
-                          className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2 text-xs"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div>
-                              <div className="font-bold text-slate-900 text-xs leading-tight">
-                                {menu.name}
-                              </div>
-                              <div className="text-[11px] font-semibold text-emerald-700">
-                                {menu.price.toLocaleString()}원
-                              </div>
-                            </div>
-                          </div>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold shrink-0">
-                            다회용기 제공
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                </div>
-
-              </div>
+              <RestaurantDetail
+                variant="panel"
+                restaurant={selectedRestaurant}
+                liked={likedRestaurants.includes(selectedRestaurant.id)}
+                onToggleLike={toggleLike}
+              />
             ) : (
               <div className="bg-white rounded-2xl p-6 text-center text-xs text-slate-500 border border-emerald-100">
                 아래 목록이나 지도의 매장 핀을 터치해주세요.
@@ -548,41 +410,65 @@ export const MapSection: React.FC<MapSectionProps> = () => {
             )}
           </div>
 
-          {/* Quick Restaurant List Strip for Mobile Thumb Browsing */}
+          {/* 식당 목록: 좁은 화면에서는 누르면 아래로 정보가 열리고, 넓은 화면에서는 오른쪽 패널에 표시됨 */}
           <div className="order-2 lg:order-3 lg:col-span-12">
             <h3 className="text-xs font-black text-slate-900 mb-2 flex items-center gap-1.5">
               <Utensils className="w-3.5 h-3.5 text-emerald-600" />
               <span>동덕여고 주변 다회용기 매장 전체 목록</span>
             </h3>
+            <p className="lg:hidden text-[11px] text-slate-500 mb-2">식당을 누르면 아래로 정보가 열려요.</p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-              {filteredRestaurants.map((rest) => (
-                <div
-                  key={rest.id}
-                  onClick={() => handleSelectRestaurant(rest)}
-                  className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-2 ${
-                  selectedRestaurant?.id === rest.id
-                    ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-300'
-                    : 'bg-white border-emerald-100 hover:border-emerald-300'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-base shrink-0">
-                    {rest.category.includes('마라탕') ? '🍜' :
-                     rest.category.includes('포케') ? '🥗' :
-                     rest.category.includes('떡볶이') ? '🍲' :
-                     rest.category.includes('카페') ? '🥤' :
-                     rest.category.includes('양식') ? '🍝' : '🍱'}
-                  </div>
-                  <div>
-                    <div className="font-extrabold text-xs text-slate-900">{rest.name}</div>
-                    <div className="text-[10px] text-slate-500">학교에서 {rest.distanceMeters}m · 배달 약 {rest.deliveryMinutes}분</div>
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5 items-start">
+              {filteredRestaurants.map((rest) => {
+                const isOpen = selectedRestaurant?.id === rest.id;
+                return (
+                  <div
+                    key={rest.id}
+                    ref={(el) => { listItemRefs.current[rest.id] = el; }}
+                    className={`scroll-mt-20 rounded-2xl border transition-all overflow-hidden ${
+                      isOpen
+                        ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-300'
+                        : 'bg-white border-emerald-100 hover:border-emerald-300'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleListItemClick(rest)}
+                      aria-expanded={isOpen}
+                      className="w-full min-h-14 p-3 flex items-center justify-between gap-2 text-left cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-base shrink-0">
+                          {rest.category.includes('마라탕') ? '🍜' :
+                           rest.category.includes('포케') ? '🥗' :
+                           rest.category.includes('떡볶이') ? '🍲' :
+                           rest.category.includes('카페') ? '🥤' :
+                           rest.category.includes('양식') ? '🍝' : '🍱'}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-extrabold text-xs text-slate-900">{rest.name}</div>
+                          <div className="text-[10px] text-slate-500">학교에서 {rest.distanceMeters}m · 배달 약 {rest.deliveryMinutes}분</div>
+                        </div>
+                      </div>
 
-                <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
-              </div>
-            ))}
+                      <ChevronRight
+                        className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-90 lg:rotate-0' : ''}`}
+                      />
+                    </button>
+
+                    {isOpen && (
+                      <div className="lg:hidden">
+                        <RestaurantDetail
+                          variant="inline"
+                          restaurant={rest}
+                          liked={likedRestaurants.includes(rest.id)}
+                          onToggleLike={toggleLike}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 

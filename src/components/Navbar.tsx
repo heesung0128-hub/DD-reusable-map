@@ -33,18 +33,19 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center justify-between h-14 sm:h-16">
           
           {/* Logo & School Badge */}
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => handlePageChange('map')}>
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white flex items-center justify-center text-emerald-600 font-black text-lg shadow-sm border border-emerald-200">
+          <div className="flex items-center gap-2.5 cursor-pointer min-w-0" onClick={() => handlePageChange('map')}>
+            <div className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 rounded-full bg-white flex items-center justify-center text-emerald-600 font-black text-lg shadow-sm border border-emerald-200">
               D
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
+            <div className="min-w-0">
+              {/* 좁은 화면에서는 제목과 겹쳐 글자가 깨지므로 숨김 */}
+              <div className="hidden sm:flex items-center gap-1.5 whitespace-nowrap">
                 <span className="text-[10px] sm:text-xs font-bold px-1.5 py-0.2 rounded-full bg-emerald-700 text-emerald-100 border border-emerald-500/60 flex items-center gap-1">
                   <School className="w-2.5 h-2.5" /> 동덕여자고등학교
                 </span>
                 <span className="text-[10px] font-medium text-emerald-200">방배동</span>
               </div>
-              <h1 className="text-sm sm:text-base font-extrabold tracking-tight text-white leading-tight">
+              <h1 className="text-sm sm:text-base font-extrabold tracking-tight text-white leading-tight whitespace-nowrap">
                 동덕여고 <span className="text-emerald-100">'용기내'</span> 지도
               </h1>
             </div>
@@ -83,10 +84,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }
                 onOpenCertModal();
               }}
-              className="min-h-11 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-white text-emerald-800 text-xs sm:text-sm font-black shadow-sm hover:bg-emerald-50 active:scale-95 transition-all flex items-center gap-1.5 border border-emerald-200"
+              className="min-h-11 shrink-0 whitespace-nowrap px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-white text-emerald-800 text-xs sm:text-sm font-black shadow-sm hover:bg-emerald-50 active:scale-95 transition-all flex items-center gap-1.5 border border-emerald-200"
             >
               <Camera className="w-3.5 h-3.5 text-emerald-600" />
-              <span>인증샷 올리기</span>
+              <span className="sm:hidden">인증 올리기</span>
+              <span className="hidden sm:inline">인증샷 올리기</span>
             </button>
 
             {/* Mobile Menu Toggle */}

@@ -11,6 +11,7 @@ import {
 import { db } from '../lib/firebase';
 import { CertificationPost } from '../types';
 import { RESTAURANTS_DATA } from '../data/mockData';
+import { FOOD_CATEGORIES, getRestaurantCategory } from '../data/categories';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 // Phone camera photos are often several MB; downscale + re-encode before
@@ -94,17 +95,20 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
     return [];
   });
 
-  const [filterRestaurant, setFilterRestaurant] = useState<string>('전체');
+  const [filterCategory, setFilterCategory] = useState<string>('전체');
 
   useBodyScrollLock(isModalOpen);
 
   // Form State
   const [authorName, setAuthorName] = useState('');
   const [gradeClass, setGradeClass] = useState('동덕여고 2학년 3반');
-  const [selectedRest, setSelectedRest] = useState(RESTAURANTS_DATA[0].name);
-  const [menuName, setMenuName] = useState('에코 마라탕 / 떡볶이');
+  const [selectedRest, setSelectedRest] = useState('');
+  const [menuName, setMenuName] = useState('');
   const [comment, setComment] = useState('');
-  const [photoUrl, setPhotoUrl] = useState('https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80');
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [photoProcessing, setPhotoProcessing] = useState(false);
+  // 파일 선택 칸은 값을 직접 비울 수 없어서, key를 바꿔 새로 만들어 초기화함
+  const [fileInputKey, setFileInputKey] = useState(0);
 
   // Subscribe to the shared certification board in Firestore
   useEffect(() => {
@@ -155,22 +159,19 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
     }
   }, [myPostIds]);
 
-  const presetPhotos = [
-    { label: '스텐 마라탕 용기', url: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80' },
-    { label: '다회용 떡볶이 용기', url: 'https://images.unsplash.com/photo-1627042633145-b780d842ba45?auto=format&fit=crop&w=600&q=80' },
-    { label: '에코 보울 포케', url: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80' },
-    { label: '다회용 컵 & 베이커리', url: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=80' },
-  ];
-
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setPhotoProcessing(true);
     compressImageFile(file)
       .then(setPhotoUrl)
       .catch((err) => {
         console.error(err);
+        setPhotoUrl('');
+        setFileInputKey((k) => k + 1);
         alert('사진을 처리하는 중 문제가 발생했습니다. 다른 사진을 선택해주세요.');
-      });
+      })
+      .finally(() => setPhotoProcessing(false));
   };
 
   const handleToggleLike = async (postId: string) => {
@@ -216,6 +217,18 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
       alert('이름과 실천 소감을 입력해주세요!');
       return;
     }
+    if (!selectedRest) {
+      alert('이용한 매장을 선택해주세요!');
+      return;
+    }
+    if (photoProcessing) {
+      alert('사진을 처리하는 중입니다. 잠시 후 다시 눌러주세요.');
+      return;
+    }
+    if (!photoUrl) {
+      alert('인증 사진을 올려주세요!');
+      return;
+    }
 
     const newPostData = {
       studentName: authorName.trim(),
@@ -245,15 +258,20 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
 
       setAuthorName('');
       setComment('');
+      setSelectedRest('');
+      setMenuName('');
+      setPhotoUrl('');
+      setFileInputKey((k) => k + 1);
     } catch (err) {
       console.error(err);
       alert('인증 등록 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
     }
   };
 
+  // 첫 화면과 같은 카테고리 이름으로 거름. 지도에 없는 식당의 글은 '전체'에서만 보임
   const filteredPosts = posts.filter(post => {
-    if (filterRestaurant === '전체') return true;
-    return post.restaurantName.includes(filterRestaurant);
+    if (filterCategory === '전체') return true;
+    return getRestaurantCategory(post.restaurantName) === filterCategory;
   });
 
   return (
@@ -301,19 +319,19 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
       {!postsLoading && !postsError && (
       <>
       {/* Filter Tabs */}
-      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-xs font-bold text-slate-500 mr-1 flex items-center gap-1">
-            <Filter className="w-3.5 h-3.5" /> 매장별:
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+          <span className="text-xs font-bold text-slate-500 mr-1 flex items-center gap-1 shrink-0">
+            <Filter className="w-3.5 h-3.5" /> 카테고리:
           </span>
-          {['전체', '마라탕', '떡볶이', '포케', '제육', '카페'].map((filter) => (
+          {FOOD_CATEGORIES.map((filter) => (
             <button
               key={filter}
-              onClick={() => setFilterRestaurant(filter)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                filterRestaurant === filter
+              onClick={() => setFilterCategory(filter)}
+              className={`min-h-11 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all shrink-0 ${
+                filterCategory === filter
                   ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-white text-slate-700 border border-emerald-200 hover:bg-emerald-50'
+                  : 'bg-white text-slate-700 border border-emerald-100 hover:bg-emerald-50'
               }`}
             >
               {filter}
@@ -435,101 +453,98 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
             </div>
 
             <form onSubmit={handleSubmitNewPost} className="space-y-3">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-700 mb-1 uppercase">
+                  <label htmlFor="cert-author" className="block text-[10px] font-black text-slate-700 mb-1">
                     작성자 이름 / 닉네임 *
                   </label>
                   <input
+                    id="cert-author"
                     type="text"
                     required
                     placeholder="예: 김민서"
                     value={authorName}
                     onChange={(e) => setAuthorName(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-slate-700 mb-1 uppercase">
+                  <label htmlFor="cert-grade" className="block text-[10px] font-black text-slate-700 mb-1">
                     학년 및 반
                   </label>
                   <input
+                    id="cert-grade"
                     type="text"
                     placeholder="예: 동덕여고 2학년 3반"
                     value={gradeClass}
                     onChange={(e) => setGradeClass(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-700 mb-1 uppercase">
-                    이용한 매장
+                  <label htmlFor="cert-restaurant" className="block text-[10px] font-black text-slate-700 mb-1">
+                    이용한 매장 *
                   </label>
-                  <input
-                    type="text"
-                    list="cert-restaurant-options"
+                  <select
+                    id="cert-restaurant"
+                    required
                     value={selectedRest}
                     onChange={(e) => setSelectedRest(e.target.value)}
-                    placeholder="매장명 입력 또는 선택"
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
-                  />
-                  <datalist id="cert-restaurant-options">
-                    {RESTAURANTS_DATA.map(r => (
-                      <option key={r.id} value={r.name} />
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
+                  >
+                    <option value="">매장을 선택하세요</option>
+                    {FOOD_CATEGORIES.filter((c) => c !== '전체').map((cat) => (
+                      <optgroup key={cat} label={cat}>
+                        {RESTAURANTS_DATA.filter((r) => r.category === cat).map((r) => (
+                          <option key={r.id} value={r.name}>{r.name}</option>
+                        ))}
+                      </optgroup>
                     ))}
-                  </datalist>
+                  </select>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black text-slate-700 mb-1 uppercase">
+                  <label htmlFor="cert-menu" className="block text-[10px] font-black text-slate-700 mb-1">
                     메뉴 이름
                   </label>
                   <input
+                    id="cert-menu"
                     type="text"
                     value={menuName}
                     onChange={(e) => setMenuName(e.target.value)}
-                    placeholder="예: 마라탕 / 떡볶이"
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
+                    placeholder="예: 야채마라탕"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
                   />
                 </div>
               </div>
 
-              {/* Photo Upload & Presets */}
+              {/* 인증 사진: 직접 업로드만 (필수) */}
               <div>
-                <label className="block text-[10px] font-black text-slate-700 mb-1 uppercase">
-                  인증 사진 등록 (직접 업로드 또는 샘플 선택)
+                <label htmlFor="cert-photo" className="block text-[10px] font-black text-slate-700 mb-1">
+                  인증 사진 *
                 </label>
-                
+                <p className="text-[10px] text-slate-400 mb-1.5">직접 찍은 사진을 올려주세요. 사진은 자동으로 크기가 줄어서 올라가요.</p>
+
                 <input
+                  id="cert-photo"
+                  key={fileInputKey}
                   type="file"
                   accept="image/*"
+                  required
                   onChange={handleFileUpload}
-                  className="w-full mb-2 text-[11px] text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[11px] file:font-black file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200 cursor-pointer"
+                  className="w-full mb-2 text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200 cursor-pointer"
                 />
 
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-                  {presetPhotos.map((p, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setPhotoUrl(p.url)}
-                      className={`px-2 py-1 rounded-lg text-[10px] font-bold shrink-0 border transition-all ${
-                        photoUrl === p.url
-                          ? 'bg-emerald-600 text-white border-emerald-600'
-                          : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      {p.label}
-                    </button>
-                  ))}
-                </div>
+                {photoProcessing && (
+                  <p className="text-[11px] text-slate-500">사진을 처리하는 중...</p>
+                )}
 
-                {photoUrl && (
-                  <div className="mt-2 h-24 rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+                {photoUrl && !photoProcessing && (
+                  <div className="h-40 sm:h-32 rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
                     <img src={photoUrl} alt="미리보기" className="w-full h-full object-cover" />
                   </div>
                 )}
@@ -545,14 +560,15 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
                   placeholder="다회용기 주문 후기나 교내 반납 경험을 적어주세요!"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
                 />
               </div>
 
               <div className="pt-2 flex gap-2">
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-emerald-600 text-white rounded-xl text-xs font-black shadow-md hover:bg-emerald-700 active:scale-98 transition-all flex items-center justify-center gap-1.5"
+                  disabled={photoProcessing}
+                  className="flex-1 py-3 bg-emerald-600 text-white rounded-xl text-xs font-black shadow-md hover:bg-emerald-700 active:scale-98 transition-all flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>인증 등록하기</span>
