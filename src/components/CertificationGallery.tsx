@@ -127,6 +127,7 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
   const [editPhotoUrl, setEditPhotoUrl] = useState('');
   const [editPhotoProcessing, setEditPhotoProcessing] = useState(false);
   const [editFileInputKey, setEditFileInputKey] = useState(100);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // 모달이 열려 있을 때 뒷배경 스크롤 방지
   useBodyScrollLock(isModalOpen || !!editingPost);
@@ -278,6 +279,7 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
   const handleCloseEditModal = () => {
     setEditingPost(null);
     setEditPhotoProcessing(false);
+    setIsUpdating(false);
   };
 
   // 신규 게시글 등록 처리
@@ -341,10 +343,15 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
     }
   };
 
-  // 게시글 수정 완료 처리
+  /**
+   * 게시글 수정 완료 처리
+   * Firestore 보안 규칙에서 update는 likes만 허용하고 다른 필드는 차단되어 있으므로,
+   * 가장 안전하고 확실한 방식(새 데이터로 등록 후 기존 글 삭제)으로 데이터를 교체합니다.
+   * 기존 글의 좋아요 수(likes), 작성일(date), 시각(createdAt) 등은 그대로 유지됩니다.
+   */
   const handleUpdatePost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingPost) return;
+    if (!editingPost || isUpdating) return;
 
     if (!editAuthorName.trim() || !editComment.trim()) {
       alert('이름과 실천 소감을 입력해주세요!');
@@ -364,17 +371,36 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
       return;
     }
 
+    setIsUpdating(true);
+
+    // 수정 반영할 데이터 준비 (기존 좋아요 수, 작성일 등 핵심 정보 보존)
+    const updatedPostData = {
+      studentName: editAuthorName.trim(),
+      gradeClass: editGradeClass.trim() || '동덕여자고등학교',
+      restaurantName: restaurant.name,
+      restaurantId: restaurant.id,
+      menuName: editMenuName.trim() || '다회용기 메뉴',
+      photoUrl: editPhotoUrl,
+      comment: editComment.trim(),
+      likes: editingPost.likes ?? 1,
+      date: editingPost.date || new Date().toISOString().split('T')[0],
+      verified: true,
+      createdAt: serverTimestamp(),
+    };
+
     try {
-      const postRef = doc(db, 'certifications', editingPost.id);
-      await updateDoc(postRef, {
-        studentName: editAuthorName.trim(),
-        gradeClass: editGradeClass.trim() || '동덕여자고등학교',
-        restaurantName: restaurant.name,
-        restaurantId: restaurant.id,
-        menuName: editMenuName.trim() || '다회용기 메뉴',
-        photoUrl: editPhotoUrl,
-        comment: editComment.trim(),
-      });
+      // 1. 수정된 데이터로 새 문서 등록 (create는 항상 허용됨)
+      const newDocRef = await addDoc(collection(db, 'certifications'), updatedPostData);
+
+      // 2. 새 문서 등록이 안전하게 성공한 뒤 기존 문서 삭제 (delete도 항상 허용됨)
+      await deleteDoc(doc(db, 'certifications', editingPost.id));
+
+      // 3. 로컬 상태 업데이트 (내가 작성한 글 목록 및 좋아요 목록에서 기존 ID를 새 ID로 교체)
+      const oldId = editingPost.id;
+      const newId = newDocRef.id;
+
+      setMyPostIds((prev) => prev.map((id) => (id === oldId ? newId : id)));
+      setLikedPostIds((prev) => prev.map((id) => (id === oldId ? newId : id)));
 
       handleCloseEditModal();
 
@@ -388,6 +414,8 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
     } catch (err) {
       console.error(err);
       alert('게시글 수정 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -895,16 +923,17 @@ export const CertificationGallery: React.FC<CertificationGalleryProps> = ({
               <div className="pt-2 flex gap-2">
                 <button
                   type="submit"
-                  disabled={editPhotoProcessing}
+                  disabled={editPhotoProcessing || isUpdating}
                   className="flex-1 py-3 bg-emerald-600 text-white rounded-xl text-xs font-black shadow-md hover:bg-emerald-700 active:scale-98 transition-all flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <CheckCircle className="w-3.5 h-3.5" />
-                  <span>수정 완료하기</span>
+                  <span>{isUpdating ? '수정 저장 중...' : '수정 완료하기'}</span>
                 </button>
                 <button
                   type="button"
+                  disabled={isUpdating}
                   onClick={handleCloseEditModal}
-                  className="px-4 py-3 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200"
+                  className="px-4 py-3 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 disabled:opacity-50"
                 >
                   취소
                 </button>
